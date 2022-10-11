@@ -8,9 +8,11 @@ class PrRaiser
 
   def raise_prs!
     repos.each do |repo|
+      print "Raising PR for #{repo.name}..."
       create_sync_branch! repo
       commit_sync_workflow! repo
       create_sync_pr! repo
+      puts " ✅"
     end
   end
 
