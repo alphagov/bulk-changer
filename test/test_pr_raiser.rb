@@ -20,7 +20,7 @@ class TestPrRaiser < Minitest::Test
       )
   end
 
-  def test_repos
+  def test_raise_prs!
     stub_request(:get, "https://docs.publishing.service.gov.uk/repos.json").
       to_return(
         status: 200,
