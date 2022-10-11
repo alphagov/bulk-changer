@@ -6,7 +6,7 @@ The pull requests that Dependabot raises do not use these templates, which has l
 
 This repo contains a script that will find every GOV.UK repo that contains a pull request template, and will automatically raise a PR to add a GitHub Actions workflow[^workflow] that will post the pull request description as a comment on each pull request that Dependabot raises.
 
-To run the script (this requires a GitHub API token that has permission to read & raise PRs on every GOV.UK repo):
+To run the script (this requires a GitHub API token with the `workflow` scope):
 
 `GITHUB_TOKEN="..." bundle exec rake raise_prs`
 
