@@ -52,6 +52,7 @@ class TestPrRaiser < Minitest::Test
         status: 200,
         headers: { "Content-Type": "application/json" },
         body: {
+          name: "repo-with-pr-template-but-no-sync-workflow",
           full_name: "alphagov/repo-with-pr-template-but-no-sync-workflow",
           default_branch: "main"
         }.to_json
@@ -90,7 +91,9 @@ class TestPrRaiser < Minitest::Test
       ).
       to_return(status: 200)
 
-    PrRaiser.new.raise_prs!
+    assert_output "Raising PR for repo-with-pr-template-but-no-sync-workflow... ✅\n" do
+      PrRaiser.new.raise_prs!
+    end
 
     assert_requested raise_pr_stub
   end
