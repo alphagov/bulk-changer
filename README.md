@@ -12,6 +12,6 @@ To run the script (this requires a GitHub API token with the `workflow` scope):
 
 To run the test suite:
 
-`bundle exec rake test`
+`bundle exec rake`
 
 [^workflow]: https://github.com/robinjam/dependabot-pr-sync/blob/main/copy-pr-template-to-dependabot-prs.yaml

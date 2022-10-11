@@ -1,9 +1,6 @@
-require "minitest/autorun"
-require "webmock/minitest"
-
 require "pr_raiser"
 
-class TestPrRaiser < Minitest::Test
+describe PrRaiser, "#raise_prs!" do
   def stub_contents(repo_name, filename, file_content)
     stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{filename}").
       to_return(
@@ -20,7 +17,7 @@ class TestPrRaiser < Minitest::Test
       )
   end
 
-  def test_raise_prs!
+  it "raises a PR for repos that have a PR template" do
     stub_request(:get, "https://docs.publishing.service.gov.uk/repos.json").
       to_return(
         status: 200,
@@ -91,10 +88,8 @@ class TestPrRaiser < Minitest::Test
       ).
       to_return(status: 200)
 
-    assert_output "Raising PR for repo-with-pr-template-but-no-sync-workflow... ✅\n" do
-      PrRaiser.new.raise_prs!
-    end
+    expect { PrRaiser.new.raise_prs! }.to output("Raising PR for repo-with-pr-template-but-no-sync-workflow... ✅\n").to_stdout
 
-    assert_requested raise_pr_stub
+    expect(raise_pr_stub).to have_been_requested
   end
 end

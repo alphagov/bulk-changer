@@ -1,10 +1,10 @@
-require "minitest/test_task"
+require "rspec/core/rake_task"
 require_relative "lib/pr_raiser"
 
-Minitest::TestTask.create
+RSpec::Core::RakeTask.new :spec
 
 task :raise_prs do
   PrRaiser.new.raise_prs!
 end
 
-task :default => :test
+task :default => :spec
