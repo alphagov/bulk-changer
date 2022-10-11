@@ -4,7 +4,7 @@ require "open-uri"
 class PrRaiser
   BRANCH_NAME = "sync-dependabot-prs"
   COMMIT_TITLE = "Create workflow to copy PR template onto Dependabot PRs"
-  PR_DESCRIPTION = "This PR has been automatically raised by a script. For more details, please visit ..."
+  PR_DESCRIPTION = "This PR has been automatically raised by a script. For more details, please visit https://github.com/alphagov/dependabot-pr-sync"
 
   def raise_prs!
     repos.each do |repo|
