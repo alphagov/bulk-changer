@@ -160,3 +160,16 @@ def stub_create_contents_request(repo_name, src_path:, dst_path:, commit_title:,
     ).
     to_return(status: 200)
 end
+
+def stub_create_pull_request(repo_name, branch:, title:, description:)
+  stub_request(:post, "https://api.github.com/repos/alphagov/#{repo_name}/pulls").
+    with(
+      body: {
+        "base": "main",
+        "head": branch,
+        "title": title,
+        "body": description,
+      }
+    ).
+    to_return(status: 200)
+end

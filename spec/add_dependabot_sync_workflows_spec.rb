@@ -24,16 +24,7 @@ describe "#add_dependabot_sync_workflows!" do
       branch: BRANCH
     )
     
-    raise_pr_stub = stub_request(:post, "https://api.github.com/repos/alphagov/repo-with-pr-template-but-no-sync-workflow/pulls").
-      with(
-        body: {
-          "base": "main",
-          "head": BRANCH,
-          "title": TITLE,
-          "body": DESCRIPTION,
-        }
-      ).
-      to_return(status: 200)
+    raise_pr_stub = stub_create_pull_request("repo-with-pr-template-but-no-sync-workflow", branch: BRANCH, title: TITLE, description: DESCRIPTION)
 
     expect { add_dependabot_sync_workflows! }.to output("Raising PR for repo-with-pr-template-but-no-sync-workflow... ✅\n").to_stdout
 
