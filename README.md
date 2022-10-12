@@ -1,4 +1,12 @@
-# Dependabot PR Sync
+# Bulk Changer
+
+This repo is intended to be a home for several scripts that make changes to GOV.UK repositories by bulk-raising pull requests. Currently it contains one script: `add_dependabot_sync_workflows`, detailed below.
+
+To run the test suite:
+
+`bundle exec rake`
+
+# add_dependabot_sync_workflows
 
 Several `alphagov` repositories contain pull request templates, to warn requesters about things like the fact that the repo is continuously deployed, that the repo requires manual pre- or post- merge steps, or that the repo lacks an automated test suite.
 
@@ -8,10 +16,6 @@ This repo contains a script that will find every GOV.UK repo that contains a pul
 
 To run the script (this requires a GitHub API token with the `workflow` scope):
 
-`GITHUB_TOKEN="..." bundle exec rake raise_prs`
-
-To run the test suite:
-
-`bundle exec rake`
+`GITHUB_TOKEN="..." bundle exec rake add_dependabot_sync_workflows`
 
 [^workflow]: https://github.com/robinjam/dependabot-pr-sync/blob/main/copy-pr-template-to-dependabot-prs.yaml
