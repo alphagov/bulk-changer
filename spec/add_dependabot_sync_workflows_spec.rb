@@ -18,16 +18,12 @@ describe "#add_dependabot_sync_workflows!" do
   end
 
   it "raises a PR for repos that have a PR template" do
-    stub_request(:get, "https://docs.publishing.service.gov.uk/repos.json").
-      to_return(
-        status: 200,
-        body: [
-          { "app_name": "repo-without-pr-template" },
-          { "app_name": "repo-with-pr-template-but-no-sync-workflow" },
-          { "app_name": "repo-with-pr-template-and-pr-to-create-sync-workflow" },
-          { "app_name": "repo-with-sync-workflow" },
-        ].to_json
-      )
+    stub_govuk_repos([
+      "repo-without-pr-template",
+      "repo-with-pr-template-but-no-sync-workflow",
+      "repo-with-pr-template-and-pr-to-create-sync-workflow",
+      "repo-with-sync-workflow",
+    ])
 
     stub_contents("repo-without-pr-template",                             ".github/pull_request_template.md", nil)
     stub_contents("repo-with-pr-template-but-no-sync-workflow",           ".github/pull_request_template.md", "This is a PR template!")

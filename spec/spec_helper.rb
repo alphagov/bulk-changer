@@ -98,3 +98,12 @@ RSpec.configure do |config|
   Kernel.srand config.seed
 =end
 end
+
+def stub_govuk_repos(repo_names)
+  stub_request(:get, "https://docs.publishing.service.gov.uk/repos.json").
+    to_return(
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+      body: repo_names.map { |repo_name| { "app_name": repo_name } }.to_json
+    )
+end
