@@ -1,6 +1,6 @@
 require "add_dependabot_sync_workflows"
 
-describe "#add_dependabot_sync_workflows!" do
+RSpec.describe "#add_dependabot_sync_workflows!" do
   before do
     stub_govuk_repos([
       "repo-without-pr-template",
