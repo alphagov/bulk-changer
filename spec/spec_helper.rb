@@ -142,3 +142,9 @@ def stub_github_repo(repo_name, feature_branches: [], contents: [])
     stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{filename}").to_return(status: 200)
   end
 end
+
+def stub_create_branch_request(repo_name, branch_name)
+  stub_request(:post, "https://api.github.com/repos/alphagov/#{repo_name}/git/refs").
+    with(body: { ref: "refs/heads/#{branch_name}", "sha": "123" }).
+    to_return(status: 200)
+end
