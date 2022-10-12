@@ -4,7 +4,7 @@ describe PrRaiser, "#raise_prs!" do
   def stub_contents(repo_name, filename, file_content)
     stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{filename}").
       to_return(
-        file_content.nil? ? { status: 404 } : { status: 200, body: file_content }
+        file_content.nil? ? { status: 404 } : { status: 200 }
       )
   end
 
