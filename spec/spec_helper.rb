@@ -107,3 +107,38 @@ def stub_govuk_repos(repo_names)
       body: repo_names.map { |repo_name| { "app_name": repo_name } }.to_json
     )
 end
+
+def stub_github_repo(repo_name, feature_branches: [], contents: [])
+  stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}").
+    to_return(
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+      body: {
+        name: repo_name,
+        full_name: "alphagov/#{repo_name}",
+        default_branch: "main"
+      }.to_json
+    )
+
+  stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/git/refs/heads/main").
+    to_return(
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+      body: {
+        "ref": "refs/heads/main",
+        "object": { "sha": "123" }
+      }.to_json
+    )
+  
+  stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/git/refs?per_page=100").
+    to_return(
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+      body: (["main"] + feature_branches).map { |branch| { "ref": "refs/heads/#{branch}" } }.to_json
+    )
+  
+  stub_request(:get, %r{\Ahttps://api.github.com/repos/alphagov/#{repo_name}/contents/.+\z}).to_return(status: 404)
+  contents.each do |filename|
+    stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{filename}").to_return(status: 200)
+  end
+end
