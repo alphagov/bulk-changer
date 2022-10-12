@@ -9,7 +9,7 @@ DESCRIPTION = <<~EOF
   
   ---
   
-  <sup>🤖 This PR was automatically raised by a script. For more details, please visit https://github.com/alphagov/dependabot-pr-sync or ask in the [Platform Reliability Slack channel](https://gds.slack.com/archives/CAEDZ4A8N).</sup>
+  <sup>🤖 This PR was automatically raised by a script. For more details, please visit https://github.com/alphagov/bulk-changer or ask in the [Platform Reliability Slack channel](https://gds.slack.com/archives/CAEDZ4A8N).</sup>
 EOF
 
 def repo_has_pr_template?(repo_name)
