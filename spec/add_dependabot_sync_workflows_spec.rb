@@ -1,6 +1,6 @@
-require "pr_raiser"
+require "add_dependabot_sync_workflows"
 
-describe PrRaiser, "#raise_prs!" do
+describe "#add_dependabot_sync_workflows!" do
   def stub_contents(repo_name, filename, file_content)
     stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{filename}").
       to_return(
@@ -41,7 +41,7 @@ describe PrRaiser, "#raise_prs!" do
 
     stub_branches("repo-without-pr-template",                             ["main"])
     stub_branches("repo-with-pr-template-but-no-sync-workflow",           ["main"])
-    stub_branches("repo-with-pr-template-and-pr-to-create-sync-workflow", ["main", PrRaiser::BRANCH_NAME])
+    stub_branches("repo-with-pr-template-and-pr-to-create-sync-workflow", ["main", BRANCH])
     stub_branches("repo-with-sync-workflow",                              ["main"])
 
     stub_request(:get, "https://api.github.com/repos/alphagov/repo-with-pr-template-but-no-sync-workflow").
@@ -70,9 +70,9 @@ describe PrRaiser, "#raise_prs!" do
     stub_request(:put, "https://api.github.com/repos/alphagov/repo-with-pr-template-but-no-sync-workflow/contents/.github/workflows/copy-pr-template-to-dependabot-prs.yaml").
       with(
         body: {
-          "branch": PrRaiser::BRANCH_NAME,
+          "branch": BRANCH,
           "content": Base64.encode64(File.read("copy-pr-template-to-dependabot-prs.yaml")).gsub(/\n/, ""),
-          "message": PrRaiser::COMMIT_TITLE,
+          "message": TITLE,
         }
       ).
       to_return(status: 200)
@@ -81,14 +81,14 @@ describe PrRaiser, "#raise_prs!" do
       with(
         body: {
           "base": "main",
-          "head": PrRaiser::BRANCH_NAME,
-          "title": PrRaiser::COMMIT_TITLE,
-          "body": PrRaiser::PR_DESCRIPTION,
+          "head": BRANCH,
+          "title": TITLE,
+          "body": DESCRIPTION,
         }
       ).
       to_return(status: 200)
 
-    expect { PrRaiser.new.raise_prs! }.to output("Raising PR for repo-with-pr-template-but-no-sync-workflow... ✅\n").to_stdout
+    expect { add_dependabot_sync_workflows! }.to output("Raising PR for repo-with-pr-template-but-no-sync-workflow... ✅\n").to_stdout
 
     expect(raise_pr_stub).to have_been_requested
   end

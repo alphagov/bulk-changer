@@ -1,10 +1,12 @@
+$LOAD_PATH.prepend "lib"
+
 require "rspec/core/rake_task"
-require_relative "lib/pr_raiser"
+require "add_dependabot_sync_workflows"
 
 RSpec::Core::RakeTask.new :spec
 
-task :raise_prs do
-  PrRaiser.new.raise_prs!
+task :add_dependabot_sync_workflows do
+  add_dependabot_sync_workflows!
 end
 
-task :default => :spec
+task default: :spec
