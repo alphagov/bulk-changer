@@ -148,3 +148,15 @@ def stub_create_branch_request(repo_name, branch_name)
     with(body: { ref: "refs/heads/#{branch_name}", "sha": "123" }).
     to_return(status: 200)
 end
+
+def stub_create_contents_request(repo_name, src_path:, dst_path:, commit_title:, branch:)
+  stub_request(:put, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{dst_path}").
+    with(
+      body: {
+        "branch": branch,
+        "content": Base64.encode64(File.read(src_path)).gsub(/\n/, ""),
+        "message": commit_title,
+      }
+    ).
+    to_return(status: 200)
+end

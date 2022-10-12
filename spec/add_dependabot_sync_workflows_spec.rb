@@ -16,15 +16,13 @@ describe "#add_dependabot_sync_workflows!" do
     
     create_branch_stub = stub_create_branch_request("repo-with-pr-template-but-no-sync-workflow", BRANCH)
 
-    stub_request(:put, "https://api.github.com/repos/alphagov/repo-with-pr-template-but-no-sync-workflow/contents/.github/workflows/copy-pr-template-to-dependabot-prs.yaml").
-      with(
-        body: {
-          "branch": BRANCH,
-          "content": Base64.encode64(File.read("copy-pr-template-to-dependabot-prs.yaml")).gsub(/\n/, ""),
-          "message": TITLE,
-        }
-      ).
-      to_return(status: 200)
+    create_contents_stub = stub_create_contents_request(
+      "repo-with-pr-template-but-no-sync-workflow",
+      src_path: "copy-pr-template-to-dependabot-prs.yaml",
+      dst_path: ".github/workflows/copy-pr-template-to-dependabot-prs.yaml",
+      commit_title: TITLE,
+      branch: BRANCH
+    )
     
     raise_pr_stub = stub_request(:post, "https://api.github.com/repos/alphagov/repo-with-pr-template-but-no-sync-workflow/pulls").
       with(
@@ -40,6 +38,7 @@ describe "#add_dependabot_sync_workflows!" do
     expect { add_dependabot_sync_workflows! }.to output("Raising PR for repo-with-pr-template-but-no-sync-workflow... ✅\n").to_stdout
 
     expect(create_branch_stub).to have_been_requested
+    expect(create_contents_stub).to have_been_requested
     expect(raise_pr_stub).to have_been_requested
   end
 end
