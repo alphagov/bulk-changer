@@ -69,4 +69,29 @@ RSpec.describe "#bulk_update_file" do
     stub_github_repo("foo", contents: ["existing_file"])
     expect { call(unless_file_exists: ["existing_file"]) }.to output("[1/1] alphagov/foo ⏭  filters don't match\n").to_stdout
   end
+
+  it "respects GitHub's rate limit headers" do
+    stub_govuk_repos(["foo"])
+
+    rate_limit_expires_at = Time.now + 1
+    github_request_stub = stub_request(:get, "https://api.github.com/repos/alphagov/foo").
+      to_return do |request|
+        if Time.now < rate_limit_expires_at
+          {
+            status: 403,
+            headers: {
+              'X-RateLimit-Limit' => 5000,
+              'X-RateLimit-Remaining' => 0,
+              'X-RateLimit-Reset' => rate_limit_expires_at.to_i
+            },
+            body: "rate limit exceeded"
+          }
+        else
+          { status: 404 }
+        end
+      end
+
+    expect { call }.to output("[1/1] alphagov/foo ❌ repo doesn't exist (or we don't have permission)\n").to_stdout
+    expect(github_request_stub).to have_been_requested.times(2)
+  end
 end
