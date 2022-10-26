@@ -1,3 +1,4 @@
+require "setup"
 require "webmock/rspec"
 
 RSpec.configure do |config|
@@ -38,23 +39,19 @@ def stub_github_repo(repo_name, feature_branches: [], contents: [])
         default_branch: "main"
       }.to_json
     )
-
-  stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/git/refs/heads/main").
-    to_return(
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-      body: {
-        "ref": "refs/heads/main",
-        "object": { "sha": "123" }
-      }.to_json
-    )
   
-  stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/git/refs?per_page=100").
-    to_return(
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-      body: (["main"] + feature_branches).map { |branch| { "ref": "refs/heads/#{branch}" } }.to_json
-    )
+  stub_request(:get, %r{\Ahttps://api.github.com/repos/alphagov/#{repo_name}/git/refs/heads/.+\z}).to_return(status: 404)
+  (["main"] + feature_branches).each do |branch|
+    stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/git/refs/heads/#{branch}").
+      to_return(
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+        body: {
+          "ref": "refs/heads/main",
+          "object": { "sha": "123" }
+        }.to_json
+      )
+  end
   
   stub_request(:get, %r{\Ahttps://api.github.com/repos/alphagov/#{repo_name}/contents/.+\z}).to_return(status: 404)
   contents.each do |filename|
@@ -68,12 +65,12 @@ def stub_create_branch_request(repo_name, branch_name)
     to_return(status: 200)
 end
 
-def stub_create_contents_request(repo_name, src_path:, dst_path:, commit_title:, branch:)
-  stub_request(:put, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{dst_path}").
+def stub_create_contents_request(repo_name, path:, content:, commit_title:, branch:)
+  stub_request(:put, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{path}").
     with(
       body: {
         "branch": branch,
-        "content": Base64.encode64(File.read(src_path)).gsub(/\n/, ""),
+        "content": Base64.encode64(content).gsub(/\n/, ""),
         "message": commit_title,
       }
     ).

@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+
+require_relative "lib/setup"
+require "slop"
+require "bulk_update_file"
+
+def get_options
+  options = Slop::Options.new do |o|
+    o.on "-h", "--help", "print this usage information" do
+      puts o
+      exit
+    end
+    o.boolean "--dry-run", "simulate filtering repositories, but do not actually raise pull requests"
+    o.string "--github-token", "GitHub API token"
+
+    o.separator ""
+    o.string "--file-path", "path to the file to create/update (required)", required: true
+    o.string "--file-content", "desired content of the file (required)", required: true
+
+    o.separator "\npull request options:"
+    o.string "--branch", "name of the branch to commit the change to (required)", required: true
+    o.string "--pr-title", "title for the PR to raise (required)", required: true
+    o.string "--pr-description", "description of the PR to raise (required)", required: true
+
+    o.separator "\nfiltering options:"
+    o.array "--if-file-exists", "only raise a PR if this file exists on the main branch (may be specified multiple times)"
+    o.array "--unless-file-exists", "only raise a PR if this file does not exist on the main branch (may be specified multiple times)"
+  end
+
+  begin
+    options.parse(ARGV).to_hash
+  rescue Slop::Error => e
+    puts e
+    puts options
+    exit
+  end
+end
+
+bulk_update_file(**get_options)
