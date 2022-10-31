@@ -6,7 +6,7 @@ RSpec.describe "#bulk_update_file" do
       dry_run: false,
       github_token: "123",
       file_path: "file.txt",
-      file_content: "New file content",
+      file_content: "New file content\n",
       branch: "branch",
       pr_title: "PR Title",
       pr_description: "PR Description",
@@ -36,10 +36,10 @@ RSpec.describe "#bulk_update_file" do
 
   it "raises PRs for repos where the file already exists, but not with the desired content" do
     stub_govuk_repos(["foo"])
-    stub_github_repo("foo", contents: { defaults[:file_path] => "Not the desired content" })
+    stub_github_repo("foo", contents: { defaults[:file_path] => "Not the desired content\n" })
 
     create_branch_stub = stub_create_branch_request("foo", defaults[:branch])
-    create_contents_stub = stub_update_contents_request("foo", path: defaults[:file_path], content: defaults[:file_content], previous_content: "Not the desired content", commit_title: defaults[:pr_title], branch: defaults[:branch])
+    create_contents_stub = stub_update_contents_request("foo", path: defaults[:file_path], content: defaults[:file_content], previous_content: "Not the desired content\n", commit_title: defaults[:pr_title], branch: defaults[:branch])
     raise_pr_stub = stub_create_pull_request("foo", branch: defaults[:branch], title: defaults[:pr_title], description: defaults[:pr_description])
 
     expect { call }.to output("[1/1] alphagov/foo ✅ PR raised\n").to_stdout
@@ -81,7 +81,7 @@ RSpec.describe "#bulk_update_file" do
 
   it "respects the unless_file_exists filter" do
     stub_govuk_repos(["foo"])
-    stub_github_repo("foo", contents: { "existing_file" => "File content" })
+    stub_github_repo("foo", contents: { "existing_file" => "File content\n" })
     expect { call(unless_file_exists: ["existing_file"]) }.to output("[1/1] alphagov/foo ⏭  filters don't match\n").to_stdout
   end
 

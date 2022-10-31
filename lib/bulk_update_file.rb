@@ -8,6 +8,8 @@ end
 def bulk_update_file(dry_run:, github_token:, file_path:, file_content:, branch:, pr_title:, pr_description:, if_file_exists:, unless_file_exists:)
   Octokit.access_token = github_token
 
+  file_content = "#{file_content}\n" unless file_content.end_with?("\n")
+
   num_index_columns = govuk_repos.count.to_s.length
   num_name_columns = govuk_repos.map(&:length).max
   govuk_repos.each.with_index(1) do |repo_name, i|
