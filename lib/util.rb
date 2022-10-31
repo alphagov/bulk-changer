@@ -38,12 +38,10 @@ def create_pr!(repo, branch:, title:, description:)
 end
 
 def repo_contains_file?(repo_name, path)
-  begin
-    Octokit.contents(repo_name, path: path)
-    true
-  rescue Octokit::NotFound
-    false
-  end
+  Octokit.contents(repo_name, path: path)
+  true
+rescue Octokit::NotFound
+  false
 end
 
 def repo_has_branch?(repo_name, branch_name)
