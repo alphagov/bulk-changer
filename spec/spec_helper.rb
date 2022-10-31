@@ -54,14 +54,35 @@ def stub_github_repo(repo_name, feature_branches: [], contents: [])
   end
   
   stub_request(:get, %r{\Ahttps://api.github.com/repos/alphagov/#{repo_name}/contents/.+\z}).to_return(status: 404)
-  contents.each do |filename|
-    stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{filename}").to_return(status: 200)
+  contents.each do |path, content|
+    stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{path}").
+      to_return(
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+        body: {
+          sha: Digest::SHA1.hexdigest("blob #{content.length}\0#{content}"),
+          content: Base64.encode64(content),
+        }.to_json
+      )
   end
 end
 
 def stub_create_branch_request(repo_name, branch_name)
   stub_request(:post, "https://api.github.com/repos/alphagov/#{repo_name}/git/refs").
     with(body: { ref: "refs/heads/#{branch_name}", "sha": "123" }).
+    to_return(status: 200)
+end
+
+def stub_update_contents_request(repo_name, path:, content:, previous_content:, commit_title:, branch:)
+  stub_request(:put, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{path}").
+    with(
+      body: {
+        branch: branch,
+        content: Base64.strict_encode64(content),
+        message: commit_title,
+        sha: Digest::SHA1.hexdigest("blob #{previous_content.length}\0#{previous_content}")
+      }
+    ).
     to_return(status: 200)
 end
 

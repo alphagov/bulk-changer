@@ -20,8 +20,9 @@ def bulk_update_file(dry_run:, github_token:, file_path:, file_content:, branch:
       next
     end
 
-    if repo_contains_file?(repo_name, file_path)
-      puts "⏭  file already exists"
+    existing_file = get_file_contents(repo_name, file_path)
+    if !existing_file.nil? && file_content == Base64.decode64(existing_file.content)
+      puts "⏭  file already exists with desired content"
     elsif repo_has_branch?(repo_name, branch)
       puts "⏭  branch \"#{branch}\" already exists"
     elsif !filter_matches?(repo_name, if_file_exists, unless_file_exists)
@@ -35,7 +36,8 @@ def bulk_update_file(dry_run:, github_token:, file_path:, file_content:, branch:
         path: file_path,
         content: file_content,
         commit_title: pr_title,
-        branch: branch
+        branch: branch,
+        sha: existing_file&.sha,
       )
       create_pr! repo, branch: branch, title: pr_title, description: pr_description
 

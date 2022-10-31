@@ -14,13 +14,13 @@ def create_branch!(repo, branch_name)
   Octokit.create_ref(repo.full_name, "refs/heads/#{branch_name}", main_branch.object.sha)
 end
 
-def commit_file!(repo, path:, content:, commit_title:, branch:)
+def commit_file!(repo, path:, content:, commit_title:, branch:, sha: nil)
   Octokit.create_contents(
     repo.full_name,
     path,
     commit_title,
     content,
-    branch: branch
+    { branch: branch }.merge(sha.nil? ? {} : { sha: sha })
   )
 end
 
@@ -34,11 +34,14 @@ def create_pr!(repo, branch:, title:, description:)
   )
 end
 
-def repo_contains_file?(repo_name, path)
+def get_file_contents(repo_name, path)
   Octokit.contents(repo_name, path: path)
-  true
 rescue Octokit::NotFound
-  false
+  nil
+end
+
+def repo_contains_file?(repo_name, path)
+  !get_file_contents(repo_name, path).nil?
 end
 
 def repo_has_branch?(repo_name, branch_name)
