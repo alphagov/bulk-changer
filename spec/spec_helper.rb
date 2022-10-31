@@ -19,6 +19,10 @@ RSpec.configure do |config|
   config.shared_context_metadata_behavior = :apply_to_host_groups
 end
 
+def compute_blob_sha(content)
+  Digest::SHA1.hexdigest("blob #{content.length}\0#{content}")
+end
+
 def stub_govuk_repos(repo_names)
   stub_request(:get, "https://docs.publishing.service.gov.uk/repos.json").
     to_return(
@@ -60,7 +64,7 @@ def stub_github_repo(repo_name, feature_branches: [], contents: [])
         status: 200,
         headers: { "Content-Type": "application/json" },
         body: {
-          sha: Digest::SHA1.hexdigest("blob #{content.length}\0#{content}"),
+          sha: compute_blob_sha(content),
           content: Base64.encode64(content),
         }.to_json
       )
@@ -80,7 +84,7 @@ def stub_update_contents_request(repo_name, path:, content:, previous_content:, 
         branch: branch,
         content: Base64.strict_encode64(content),
         message: commit_title,
-        sha: Digest::SHA1.hexdigest("blob #{previous_content.length}\0#{previous_content}")
+        sha: compute_blob_sha(previous_content)
       }
     ).
     to_return(status: 200)

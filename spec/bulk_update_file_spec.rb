@@ -1,21 +1,28 @@
 require "bulk_update_file"
 
 RSpec.describe "#bulk_update_file" do
-  let(:defaults) {
-    {
-      dry_run: false,
-      github_token: "123",
-      file_path: "file.txt",
-      file_content: "New file content\n",
-      branch: "branch",
-      pr_title: "PR Title",
-      pr_description: "PR Description",
-      if_file_exists: [],
-      unless_file_exists: []
-    }
-  }
+  let(:dry_run)            { false }
+  let(:github_token)       { "123" }
+  let(:file_path)          { "file.txt" }
+  let(:file_content)       { "New file content\n" }
+  let(:branch)             { "branch" }
+  let(:pr_title)           { "PR Title" }
+  let(:pr_description)     { "PR Description" }
+  let(:if_file_exists)     { [] }
+  let(:unless_file_exists) { [] }
 
   def call(**options)
+    defaults = {
+      dry_run: dry_run,
+      github_token: github_token,
+      file_path: file_path,
+      file_content: file_content,
+      branch: branch,
+      pr_title: pr_title,
+      pr_description: pr_description,
+      if_file_exists: if_file_exists,
+      unless_file_exists: unless_file_exists,
+    }
     bulk_update_file(**defaults.merge(options))
   end
 
@@ -23,9 +30,9 @@ RSpec.describe "#bulk_update_file" do
     stub_govuk_repos(["foo"])
     stub_github_repo("foo")
 
-    create_branch_stub = stub_create_branch_request("foo", defaults[:branch])
-    create_contents_stub = stub_create_contents_request("foo", path: defaults[:file_path], content: defaults[:file_content], commit_title: defaults[:pr_title], branch: defaults[:branch])
-    raise_pr_stub = stub_create_pull_request("foo", branch: defaults[:branch], title: defaults[:pr_title], description: defaults[:pr_description])
+    create_branch_stub = stub_create_branch_request("foo", branch)
+    create_contents_stub = stub_create_contents_request("foo", path: file_path, content: file_content, commit_title: pr_title, branch: branch)
+    raise_pr_stub = stub_create_pull_request("foo", branch: branch, title: pr_title, description: pr_description)
 
     expect { call }.to output("[1/1] alphagov/foo ✅ PR raised\n").to_stdout
 
@@ -36,11 +43,11 @@ RSpec.describe "#bulk_update_file" do
 
   it "raises PRs for repos where the file already exists, but not with the desired content" do
     stub_govuk_repos(["foo"])
-    stub_github_repo("foo", contents: { defaults[:file_path] => "Not the desired content\n" })
+    stub_github_repo("foo", contents: { file_path => "Foo\n" })
 
-    create_branch_stub = stub_create_branch_request("foo", defaults[:branch])
-    create_contents_stub = stub_update_contents_request("foo", path: defaults[:file_path], content: defaults[:file_content], previous_content: "Not the desired content\n", commit_title: defaults[:pr_title], branch: defaults[:branch])
-    raise_pr_stub = stub_create_pull_request("foo", branch: defaults[:branch], title: defaults[:pr_title], description: defaults[:pr_description])
+    create_branch_stub = stub_create_branch_request("foo", branch)
+    create_contents_stub = stub_update_contents_request("foo", path: file_path, content: file_content, previous_content: "Foo\n", commit_title: pr_title, branch: branch)
+    raise_pr_stub = stub_create_pull_request("foo", branch: branch, title: pr_title, description: pr_description)
 
     expect { call }.to output("[1/1] alphagov/foo ✅ PR raised\n").to_stdout
 
@@ -51,7 +58,7 @@ RSpec.describe "#bulk_update_file" do
 
   it "skips repos where the file already exists with the desired content" do
     stub_govuk_repos(["foo"])
-    stub_github_repo("foo", contents: { defaults[:file_path] => defaults[:file_content] })
+    stub_github_repo("foo", contents: { file_path => file_content })
     expect { call }.to output("[1/1] alphagov/foo ⏭  file already exists with desired content\n").to_stdout
   end
 
@@ -69,8 +76,8 @@ RSpec.describe "#bulk_update_file" do
 
   it "skips repos where the branch already exists" do
     stub_govuk_repos(["foo"])
-    stub_github_repo("foo", feature_branches: [defaults[:branch]])
-    expect { call }.to output("[1/1] alphagov/foo ⏭  branch \"#{defaults[:branch]}\" already exists\n").to_stdout
+    stub_github_repo("foo", feature_branches: [branch])
+    expect { call }.to output("[1/1] alphagov/foo ⏭  branch \"#{branch}\" already exists\n").to_stdout
   end
 
   it "respects the if_file_exists filter" do
