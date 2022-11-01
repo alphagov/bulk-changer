@@ -23,8 +23,10 @@ def get_options
     o.string "--pr-description", "description of the PR to raise (required)", required: true
 
     o.separator "\nfiltering options:"
-    o.array "--if-file-exists", "only raise a PR if this file exists on the main branch (may be specified multiple times)"
-    o.array "--unless-file-exists", "only raise a PR if this file does not exist on the main branch (may be specified multiple times)"
+    o.array "--if-any-exist", "only raise a PR if any of the given paths exist on the main branch (may be specified multiple times)"
+    o.array "--if-all-exist", "only raise a PR if all of the given paths exist on the main branch (may be specified multiple times)"
+    o.array "--unless-any-exist", "only raise a PR if any of the given paths do not exist on the main branch (may be specified multiple times)"
+    o.array "--unless-all-exist", "only raise a PR if all of the given paths do not exist on the main branch (may be specified multiple times)"
   end
 
   begin

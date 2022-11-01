@@ -12,21 +12,23 @@ Ensures that a file exists in every GOV.UK repo, at the given path, with the giv
 
 ```
 usage: ./bulk-update-file [options]
-    -h, --help            print this usage information
-    --dry-run             simulate filtering repositories, but do not actually raise pull requests
-    --github-token        GitHub API token
+    -h, --help          print this usage information
+    --dry-run           simulate filtering repositories, but do not actually raise pull requests
+    --github-token      GitHub API token
 
-    --file-path           path to the file to create/update (required)
-    --file-content        desired content of the file (required)
+    --file-path         path to the file to create/update (required)
+    --file-content      desired content of the file (required)
 
 pull request options:
-    --branch              name of the branch to commit the change to (required)
-    --pr-title            title for the PR to raise (required)
-    --pr-description      description of the PR to raise (required)
+    --branch            name of the branch to commit the change to (required)
+    --pr-title          title for the PR to raise (required)
+    --pr-description    description of the PR to raise (required)
 
 filtering options:
-    --if-file-exists      only raise a PR if this file exists on the main branch (may be specified multiple times)
-    --unless-file-exists  only raise a PR if this file does not exist on the main branch (may be specified multiple times)
+    --if-any-exist      only raise a PR if any of the given paths exist on the main branch (may be specified multiple times)
+    --if-all-exist      only raise a PR if all of the given paths exist on the main branch (may be specified multiple times)
+    --unless-any-exist  only raise a PR if any of the given paths do not exist on the main branch (may be specified multiple times)
+    --unless-all-exist  only raise a PR if all of the given paths do not exist on the main branch (may be specified multiple times)
 ```
 
 ## Examples
@@ -47,7 +49,9 @@ To find every GOV.UK repo that contains a pull request template, and automatical
     --pr-description "$(<./templates/copy-pr-template-to-dependabot-prs.pr-description.md)" \
     --file-path ".github/workflows/copy-pr-template-to-dependabot-prs.yaml" \
     --file-content "$(<./templates/copy-pr-template-to-dependabot-prs.yaml)" \
-    --if-file-exists ".github/pull_request_template.md"
+    --if-any-exist "pull_request_template.md" \
+    --if-any-exist "docs/pull_request_template.md" \
+    --if-any-exist ".github/pull_request_template.md"
 ```
 
 [^workflow]: https://github.com/robinjam/dependabot-pr-sync/blob/main/templates/copy-pr-template-to-dependabot-prs.yaml

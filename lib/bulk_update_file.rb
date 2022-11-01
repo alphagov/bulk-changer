@@ -1,11 +1,14 @@
 require "util"
 
-def filter_matches?(repo_name, allowlist, blocklist)
-  allowlist.all?  { |path| repo_contains_file?(repo_name, path) } &&
-  blocklist.none? { |path| repo_contains_file?(repo_name, path) }
+def filter_matches?(repo_name, if_any_exist, if_all_exist, unless_any_exist, unless_all_exist)
+  predicate = lambda { |path| repo_contains_file? repo_name, path }
+  (    if_any_exist.empty? ||      if_any_exist.any?(&predicate)) &&
+  (    if_all_exist.empty? ||      if_all_exist.all?(&predicate)) &&
+  (unless_any_exist.empty? || !unless_any_exist.any?(&predicate)) &&
+  (unless_all_exist.empty? || !unless_all_exist.all?(&predicate))
 end
 
-def bulk_update_file(dry_run:, github_token:, file_path:, file_content:, branch:, pr_title:, pr_description:, if_file_exists:, unless_file_exists:)
+def bulk_update_file(dry_run:, github_token:, file_path:, file_content:, branch:, pr_title:, pr_description:, if_any_exist:, if_all_exist:, unless_any_exist:, unless_all_exist:)
   Octokit.access_token = github_token
 
   file_content = "#{file_content}\n" unless file_content.end_with?("\n")
@@ -27,7 +30,7 @@ def bulk_update_file(dry_run:, github_token:, file_path:, file_content:, branch:
       puts "⏭  file already exists with desired content"
     elsif repo_has_branch?(repo_name, branch)
       puts "⏭  branch \"#{branch}\" already exists"
-    elsif !filter_matches?(repo_name, if_file_exists, unless_file_exists)
+    elsif !filter_matches?(repo_name, if_any_exist, if_all_exist, unless_any_exist, unless_all_exist)
       puts "⏭  filters don't match"
     elsif dry_run
       puts "✅ would raise PR (dry run)"

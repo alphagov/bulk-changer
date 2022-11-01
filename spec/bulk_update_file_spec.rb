@@ -1,15 +1,17 @@
 require "bulk_update_file"
 
 RSpec.describe "#bulk_update_file" do
-  let(:dry_run)            { false }
-  let(:github_token)       { "123" }
-  let(:file_path)          { "file.txt" }
-  let(:file_content)       { "New file content\n" }
-  let(:branch)             { "branch" }
-  let(:pr_title)           { "PR Title" }
-  let(:pr_description)     { "PR Description" }
-  let(:if_file_exists)     { [] }
-  let(:unless_file_exists) { [] }
+  let(:dry_run)          { false }
+  let(:github_token)     { "123" }
+  let(:file_path)        { "file.txt" }
+  let(:file_content)     { "New file content\n" }
+  let(:branch)           { "branch" }
+  let(:pr_title)         { "PR Title" }
+  let(:pr_description)   { "PR Description" }
+  let(:if_any_exist)     { [] }
+  let(:if_all_exist)     { [] }
+  let(:unless_any_exist) { [] }
+  let(:unless_all_exist) { [] }
 
   def call(**options)
     defaults = {
@@ -20,8 +22,10 @@ RSpec.describe "#bulk_update_file" do
       branch: branch,
       pr_title: pr_title,
       pr_description: pr_description,
-      if_file_exists: if_file_exists,
-      unless_file_exists: unless_file_exists,
+      if_any_exist: if_any_exist,
+      if_all_exist: if_all_exist,
+      unless_any_exist: unless_any_exist,
+      unless_all_exist: unless_all_exist,
     }
     bulk_update_file(**defaults.merge(options))
   end
@@ -80,16 +84,32 @@ RSpec.describe "#bulk_update_file" do
     expect { call }.to output("[1/1] alphagov/foo ⏭  branch \"#{branch}\" already exists\n").to_stdout
   end
 
-  it "respects the if_file_exists filter" do
-    stub_govuk_repos(["foo"])
-    stub_github_repo("foo")
-    expect { call(if_file_exists: ["nonexistent_file"]) }.to output("[1/1] alphagov/foo ⏭  filters don't match\n").to_stdout
-  end
-
-  it "respects the unless_file_exists filter" do
+  it "respects the if_any_exist filter" do
     stub_govuk_repos(["foo"])
     stub_github_repo("foo", contents: { "existing_file" => "File content\n" })
-    expect { call(unless_file_exists: ["existing_file"]) }.to output("[1/1] alphagov/foo ⏭  filters don't match\n").to_stdout
+    expect { call(if_any_exist: ["nonexistent_file"]) }.to output("[1/1] alphagov/foo ⏭  filters don't match\n").to_stdout
+    expect { call(if_any_exist: ["nonexistent_file", "existing_file"], dry_run: true) }.to output("[1/1] alphagov/foo ✅ would raise PR (dry run)\n").to_stdout
+  end
+
+  it "respects the if_all_exist filter" do
+    stub_govuk_repos(["foo"])
+    stub_github_repo("foo", contents: { "existing_file" => "File content\n" })
+    expect { call(if_all_exist: ["nonexistent_file", "existing_file"]) }.to output("[1/1] alphagov/foo ⏭  filters don't match\n").to_stdout
+    expect { call(if_all_exist: ["existing_file"], dry_run: true) }.to output("[1/1] alphagov/foo ✅ would raise PR (dry run)\n").to_stdout
+  end
+
+  it "respects the unless_any_exist filter" do
+    stub_govuk_repos(["foo"])
+    stub_github_repo("foo", contents: { "existing_file" => "File content\n" })
+    expect { call(unless_any_exist: ["existing_file", "nonexistent_file"]) }.to output("[1/1] alphagov/foo ⏭  filters don't match\n").to_stdout
+    expect { call(unless_any_exist: ["nonexistent_file"], dry_run: true) }.to output("[1/1] alphagov/foo ✅ would raise PR (dry run)\n").to_stdout
+  end
+
+  it "respects the unless_all_exist filter" do
+    stub_govuk_repos(["foo"])
+    stub_github_repo("foo", contents: { "existing_file" => "File content\n" })
+    expect { call(unless_all_exist: ["existing_file"]) }.to output("[1/1] alphagov/foo ⏭  filters don't match\n").to_stdout
+    expect { call(unless_all_exist: ["existing_file", "nonexistent_file"], dry_run: true) }.to output("[1/1] alphagov/foo ✅ would raise PR (dry run)\n").to_stdout
   end
 
   it "respects GitHub's rate limit headers" do
