@@ -1,6 +1,6 @@
 # Bulk Changer
 
-To run the RSpec and RuboCop:
+To run RSpec and RuboCop:
 
 `bundle exec rake`
 
