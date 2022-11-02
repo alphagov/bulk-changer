@@ -10,11 +10,13 @@ def govuk_repos
 end
 
 def create_branch!(repo, branch_name)
+  sleep 1
   main_branch = Octokit.ref(repo.full_name, "heads/#{repo.default_branch}")
   Octokit.create_ref(repo.full_name, "refs/heads/#{branch_name}", main_branch.object.sha)
 end
 
 def commit_file!(repo, path:, content:, commit_title:, branch:, sha: nil)
+  sleep 1
   Octokit.create_contents(
     repo.full_name,
     path,
@@ -25,6 +27,7 @@ def commit_file!(repo, path:, content:, commit_title:, branch:, sha: nil)
 end
 
 def create_pr!(repo, branch:, title:, description:)
+  sleep 1
   Octokit.create_pull_request(
     repo.full_name,
     repo.default_branch,
