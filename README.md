@@ -43,6 +43,7 @@ To find every GOV.UK repo that contains a pull request template, and automatical
 
 ```bash
 ./bulk-update-file \
+    --dry-run \
     --github-token "..." \
     --branch copy-pr-template-to-dependabot-prs \
     --pr-title "Create workflow to copy PR template onto Dependabot PRs" \
