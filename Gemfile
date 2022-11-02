@@ -8,5 +8,6 @@ gem "slop"
 
 group :test do
   gem "rspec"
+  gem "rubocop-govuk"
   gem "webmock"
 end
