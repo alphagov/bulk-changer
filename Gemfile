@@ -2,8 +2,8 @@
 
 source "https://rubygems.org"
 
-gem "octokit", "~> 5.6"
 gem "faraday-retry"
+gem "octokit", "~> 5.6"
 gem "slop"
 
 group :test do

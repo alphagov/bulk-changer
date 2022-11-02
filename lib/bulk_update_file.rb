@@ -1,12 +1,14 @@
 require "util"
 
+# rubocop:disable Layout/MultilineOperationIndentation, Layout/SpaceInsideParens, Style/InverseMethods
 def filter_matches?(repo_name, if_any_exist, if_all_exist, unless_any_exist, unless_all_exist)
-  predicate = lambda { |path| repo_contains_file? repo_name, path }
+  predicate = ->(path) { repo_contains_file? repo_name, path }
   (    if_any_exist.empty? ||      if_any_exist.any?(&predicate)) &&
   (    if_all_exist.empty? ||      if_all_exist.all?(&predicate)) &&
   (unless_any_exist.empty? || !unless_any_exist.any?(&predicate)) &&
   (unless_all_exist.empty? || !unless_all_exist.all?(&predicate))
 end
+# rubocop:enable Layout/MultilineOperationIndentation, Layout/SpaceInsideParens, Style/InverseMethods
 
 def bulk_update_file(dry_run:, github_token:, file_path:, file_content:, branch:, pr_title:, pr_description:, if_any_exist:, if_all_exist:, unless_any_exist:, unless_all_exist:)
   Octokit.access_token = github_token
@@ -41,7 +43,7 @@ def bulk_update_file(dry_run:, github_token:, file_path:, file_content:, branch:
         path: file_path,
         content: file_content,
         commit_title: pr_title,
-        branch: branch,
+        branch:,
         sha: existing_file&.sha,
       )
       create_pr! repo, branch: branch, title: pr_title, description: pr_description

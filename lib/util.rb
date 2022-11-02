@@ -3,9 +3,9 @@ require "open-uri"
 
 def govuk_repos
   @govuk_repos ||= JSON.parse(
-    URI.open("https://docs.publishing.service.gov.uk/repos.json").read
+    URI.open("https://docs.publishing.service.gov.uk/repos.json").read,
   ).map do |repo|
-    "alphagov/#{repo["app_name"]}"
+    "alphagov/#{repo['app_name']}"
   end
 end
 
@@ -20,7 +20,7 @@ def commit_file!(repo, path:, content:, commit_title:, branch:, sha: nil)
     path,
     commit_title,
     content,
-    { branch: branch }.merge(sha.nil? ? {} : { sha: sha })
+    { branch: }.merge(sha.nil? ? {} : { sha: }),
   )
 end
 
@@ -30,12 +30,12 @@ def create_pr!(repo, branch:, title:, description:)
     repo.default_branch,
     branch,
     title,
-    description
+    description,
   )
 end
 
 def get_file_contents(repo_name, path)
-  Octokit.contents(repo_name, path: path)
+  Octokit.contents(repo_name, path:)
 rescue Octokit::NotFound
   nil
 end
