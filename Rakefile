@@ -1,12 +1,7 @@
-$LOAD_PATH.prepend "lib"
-
 require "rspec/core/rake_task"
-require "add_dependabot_sync_workflows"
+require "rubocop/rake_task"
 
-RSpec::Core::RakeTask.new :spec
+RSpec::Core::RakeTask.new(:spec)
+RuboCop::RakeTask.new
 
-task :add_dependabot_sync_workflows do
-  add_dependabot_sync_workflows!
-end
-
-task default: :spec
+task default: %i[spec rubocop]

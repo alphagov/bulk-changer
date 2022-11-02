@@ -2,11 +2,13 @@
 
 source "https://rubygems.org"
 
-gem "octokit", "~> 5.6"
 gem "faraday-retry"
-gem "rake"
+gem "octokit", "~> 5.6"
+gem "slop"
 
 group :test do
+  gem "rake"
   gem "rspec"
+  gem "rubocop-govuk"
   gem "webmock"
 end

@@ -1,3 +1,4 @@
+require "setup"
 require "webmock/rspec"
 
 RSpec.configure do |config|
@@ -18,77 +19,98 @@ RSpec.configure do |config|
   config.shared_context_metadata_behavior = :apply_to_host_groups
 end
 
+def compute_blob_sha(content)
+  Digest::SHA1.hexdigest("blob #{content.length}\0#{content}")
+end
+
 def stub_govuk_repos(repo_names)
-  stub_request(:get, "https://docs.publishing.service.gov.uk/repos.json").
-    to_return(
+  stub_request(:get, "https://docs.publishing.service.gov.uk/repos.json")
+    .to_return(
       status: 200,
       headers: { "Content-Type": "application/json" },
-      body: repo_names.map { |repo_name| { "app_name": repo_name } }.to_json
+      body: repo_names.map { |repo_name| { "app_name": repo_name } }.to_json,
     )
 end
 
 def stub_github_repo(repo_name, feature_branches: [], contents: [])
-  stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}").
-    to_return(
+  stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}")
+    .to_return(
       status: 200,
       headers: { "Content-Type": "application/json" },
       body: {
         name: repo_name,
         full_name: "alphagov/#{repo_name}",
-        default_branch: "main"
-      }.to_json
+        default_branch: "main",
+      }.to_json,
     )
 
-  stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/git/refs/heads/main").
-    to_return(
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-      body: {
-        "ref": "refs/heads/main",
-        "object": { "sha": "123" }
-      }.to_json
-    )
-  
-  stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/git/refs?per_page=100").
-    to_return(
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-      body: (["main"] + feature_branches).map { |branch| { "ref": "refs/heads/#{branch}" } }.to_json
-    )
-  
+  stub_request(:get, %r{\Ahttps://api.github.com/repos/alphagov/#{repo_name}/git/refs/heads/.+\z}).to_return(status: 404)
+  (%w[main] + feature_branches).each do |branch|
+    stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/git/refs/heads/#{branch}")
+      .to_return(
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+        body: {
+          "ref": "refs/heads/main",
+          "object": { "sha": "123" },
+        }.to_json,
+      )
+  end
+
   stub_request(:get, %r{\Ahttps://api.github.com/repos/alphagov/#{repo_name}/contents/.+\z}).to_return(status: 404)
-  contents.each do |filename|
-    stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{filename}").to_return(status: 200)
+  contents.each do |path, content|
+    stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{path}")
+      .to_return(
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+        body: {
+          sha: compute_blob_sha(content),
+          content: Base64.encode64(content),
+        }.to_json,
+      )
   end
 end
 
 def stub_create_branch_request(repo_name, branch_name)
-  stub_request(:post, "https://api.github.com/repos/alphagov/#{repo_name}/git/refs").
-    with(body: { ref: "refs/heads/#{branch_name}", "sha": "123" }).
-    to_return(status: 200)
+  stub_request(:post, "https://api.github.com/repos/alphagov/#{repo_name}/git/refs")
+    .with(body: { ref: "refs/heads/#{branch_name}", "sha": "123" })
+    .to_return(status: 200)
 end
 
-def stub_create_contents_request(repo_name, src_path:, dst_path:, commit_title:, branch:)
-  stub_request(:put, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{dst_path}").
-    with(
+def stub_update_contents_request(repo_name, path:, content:, previous_content:, commit_title:, branch:)
+  stub_request(:put, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{path}")
+    .with(
+      body: {
+        branch:,
+        content: Base64.strict_encode64(content),
+        message: commit_title,
+        sha: compute_blob_sha(previous_content),
+      },
+    )
+    .to_return(status: 200)
+end
+
+def stub_create_contents_request(repo_name, path:, content:, commit_title:, branch:)
+  stub_request(:put, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{path}")
+    .with(
       body: {
         "branch": branch,
-        "content": Base64.encode64(File.read(src_path)).gsub(/\n/, ""),
+        "content": Base64.encode64(content).gsub(/\n/, ""),
         "message": commit_title,
-      }
-    ).
-    to_return(status: 200)
+      },
+    )
+    .to_return(status: 200)
 end
 
 def stub_create_pull_request(repo_name, branch:, title:, description:)
-  stub_request(:post, "https://api.github.com/repos/alphagov/#{repo_name}/pulls").
-    with(
+  stub_request(:post, "https://api.github.com/repos/alphagov/#{repo_name}/pulls")
+    .with(
       body: {
         "base": "main",
         "head": branch,
         "title": title,
         "body": description,
-      }
-    ).
-    to_return(status: 200)
+      },
+    )
+    .to_return(status: 200)
 end
