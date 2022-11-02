@@ -7,6 +7,7 @@ gem "octokit", "~> 5.6"
 gem "slop"
 
 group :test do
+  gem "rake"
   gem "rspec"
   gem "rubocop-govuk"
   gem "webmock"
