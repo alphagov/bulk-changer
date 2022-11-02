@@ -50,6 +50,7 @@ To find every GOV.UK repo that contains a pull request template, and automatical
     --pr-description "$(<./templates/copy-pr-template-to-dependabot-prs.pr-description.md)" \
     --file-path ".github/workflows/copy-pr-template-to-dependabot-prs.yaml" \
     --file-content "$(<./templates/copy-pr-template-to-dependabot-prs.yaml)" \
+    --if-all-exist ".github/dependabot.yml" \
     --if-any-exist "pull_request_template.md" \
     --if-any-exist "docs/pull_request_template.md" \
     --if-any-exist ".github/pull_request_template.md"
