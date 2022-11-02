@@ -54,4 +54,7 @@ To find every GOV.UK repo that contains a pull request template, and automatical
     --if-any-exist ".github/pull_request_template.md"
 ```
 
+<img alt="Screenshot showing sample command-line output" src="docs/screenshot.png">
+
+
 [^workflow]: https://github.com/robinjam/dependabot-pr-sync/blob/main/templates/copy-pr-template-to-dependabot-prs.yaml
