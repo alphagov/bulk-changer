@@ -4,4 +4,4 @@ This PR adds a GitHub Actions workflow that will post the PR template as a comme
 
 ---
 
-<sup>🤖 This PR was automatically raised by a script. For more details, please visit https://github.com/alphagov/bulk-changer or ask in the [Platform Reliability Slack channel](https://gds.slack.com/archives/CAEDZ4A8N).</sup>
+<sup>🤖 This PR was automatically raised by [a script](https://github.com/alphagov/bulk-changer). For more details, please ask in the [Platform Reliability Slack channel](https://gds.slack.com/archives/CAEDZ4A8N).</sup>
