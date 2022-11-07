@@ -15,9 +15,17 @@ def bulk_update_file(dry_run:, github_token:, file_path:, file_content:, branch:
 
   file_content = "#{file_content}\n" unless file_content.end_with?("\n")
 
+  quit_requested = false
+  Signal.trap("INT") do
+    print "Terminating..."
+    quit_requested = true
+  end
+
   num_index_columns = govuk_repos.count.to_s.length
   num_name_columns = govuk_repos.map(&:length).max
   govuk_repos.each.with_index(1) do |repo_name, i|
+    exit 130 if quit_requested
+
     print "[#{i.to_s.rjust(num_index_columns)}/#{govuk_repos.count}] #{repo_name.ljust(num_name_columns)} "
 
     repo = begin
