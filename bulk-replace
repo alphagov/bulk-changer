@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+
+require_relative "lib/setup"
+require "slop"
+require "bulk_replace"
+
+def get_options
+  options = Slop::Options.new do |o|
+    o.on "-h", "--help", "print this usage information" do
+      puts o
+      exit
+    end
+    o.string "--github-token", "GitHub API token"
+
+    o.separator ""
+    o.string "--file-path", "path to the file to update (required)", required: true
+    o.string "--old-content", "content to be changed (required)", required: true
+    o.string "--new-content", "new content (required)", required: true
+    o.boolean "--global", "replace all occurrences of content (required)", required: true
+
+    o.separator "\npull request options:"
+    o.string "--branch", "name of the branch to commit the change to (required)", required: true
+    o.string "--pr-title", "title for the PR to raise (required)", required: true
+    o.string "--pr-description", "description of the PR to raise (required)", required: true
+  end
+
+  begin
+    options.parse(ARGV).to_hash
+  rescue Slop::Error => e
+    puts e
+    puts options
+    exit
+  end
+end
+
+bulk_replace(**get_options)
