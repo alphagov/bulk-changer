@@ -43,7 +43,7 @@ def bulk_update_file(dry_run:, github_token:, file_path:, file_content:, branch:
     elsif !filter_matches?(repo_name, if_any_exist, if_all_exist, unless_any_exist, unless_all_exist)
       puts "⏭  filters don't match"
     elsif dry_run
-      puts "✅ would raise PR (dry run)"
+      puts "✅ would should raise PR (dry run)"
     else
       create_branch! repo, branch
       commit_file!(
