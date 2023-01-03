@@ -31,6 +31,26 @@ filtering options:
     --unless-all-exist  only raise a PR if all of the given paths do not exist on the main branch (may be specified multiple times)
 ```
 
+### `bulk-replace`
+
+Look for a file in every GOV.UK repo, at the given path, with the given content and replace with new content. If the file does not currently exist, or if it doesn't have the given content, then that repo is skipped, otherwise a PR is raised.
+
+```
+usage: ./bulk-replace [options]
+    -h, --help          print this usage information
+    --github-token      GitHub API token
+
+    --file-path         path to the file to update (required)
+    --old-content       content to be replaced in file (required)
+    --new-content       new content for file (required)
+    --global            replace all occurrences of content (true by default)
+
+pull request options:
+    --branch            name of the branch to commit the change to (required)
+    --pr-title          title for the PR to raise (required)
+    --pr-description    description of the PR to raise (required)
+```
+
 ## Examples
 
 ### Create workflows to copy PR template onto Dependabot PRs
