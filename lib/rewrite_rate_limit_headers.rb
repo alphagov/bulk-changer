@@ -21,6 +21,10 @@ class RewriteRateLimitHeaders < Faraday::Middleware
         # (We add 5 extra seconds for safety, in case the client & server clocks are out of sync)
         headers["RateLimit-Reset"] = Time.at(headers["X-RateLimit-Reset"].to_i + 5).rfc2822
       end
+      if headers["RateLimit-Remaining"] == "0"
+        limit_expires_at = Time.rfc2822(headers["RateLimit-Reset"]).localtime
+        print "[rate limited until #{limit_expires_at.strftime "%H:%M"}] "
+      end
     end
   end
 end

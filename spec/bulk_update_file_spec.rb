@@ -78,10 +78,10 @@ RSpec.describe "#bulk_update_file" do
     expect { call }.to output("[1/1] alphagov/foo ❌ repo doesn't exist (or we don't have permission)\n").to_stdout
   end
 
-  it "skips repos where the branch already exists" do
+  it "skips repos where a PR is already open with the desired content" do
     stub_govuk_repos(%w[foo])
-    stub_github_repo("foo", feature_branches: [branch])
-    expect { call }.to output("[1/1] alphagov/foo ⏭  branch \"#{branch}\" already exists\n").to_stdout
+    stub_github_repo("foo", feature_branches: [branch], pull_request_branches: [branch])
+    expect { call }.to output("[1/1] alphagov/foo ⏭  PR already created\n").to_stdout
   end
 
   it "respects the if_any_exist filter" do
@@ -132,8 +132,7 @@ RSpec.describe "#bulk_update_file" do
           { status: 404 }
         end
       end
-
-    expect { call }.to output("[1/1] alphagov/foo ❌ repo doesn't exist (or we don't have permission)\n").to_stdout
+    expect { call }.to output("[1/1] alphagov/foo [rate limited until #{rate_limit_expires_at.strftime "%H:%M"}] ❌ repo doesn't exist (or we don't have permission)\n").to_stdout
     expect(github_request_stub).to have_been_requested.times(2)
   end
 end

@@ -35,26 +35,29 @@ def bulk_update_file(dry_run:, github_token:, file_path:, file_content:, branch:
       next
     end
 
-    existing_file = get_file_contents(repo_name, file_path)
-    if !existing_file.nil? && file_content == Base64.decode64(existing_file.content)
+    existing_file_on_main = get_file_contents repo_name, file_path
+    branch_exists = repo_has_branch? repo_name, branch
+    pr_exists = repo_has_pr_for_branch? repo_name, branch
+    existing_file_in_pr = pr_exists ? get_file_contents(repo_name, file_path, branch) : nil
+    if !existing_file_on_main.nil? && file_content == Base64.decode64(existing_file_on_main.content)
       puts "⏭  file already exists with desired content"
-    elsif repo_has_branch?(repo_name, branch)
-      puts "⏭  branch \"#{branch}\" already exists"
+    elsif branch_exists && pr_exists && file_content == Base64.decode64(existing_file_in_pr.content)
+      puts "⏭  PR already created"
     elsif !filter_matches?(repo_name, if_any_exist, if_all_exist, unless_any_exist, unless_all_exist)
       puts "⏭  filters don't match"
     elsif dry_run
       puts "✅ would raise PR (dry run)"
     else
-      create_branch! repo, branch
+      create_branch! repo, branch unless branch_exists
       commit_file!(
         repo,
         path: file_path,
         content: file_content,
         commit_title: pr_title,
         branch:,
-        sha: existing_file&.sha,
+        sha: (pr_exists ? existing_file_in_pr : existing_file_on_main)&.sha,
       )
-      create_pr! repo, branch: branch, title: pr_title, description: pr_description
+      create_pr! repo, branch: branch, title: pr_title, description: pr_description unless pr_exists
 
       puts "✅ PR raised"
     end

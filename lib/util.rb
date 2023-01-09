@@ -37,7 +37,8 @@ def create_pr!(repo, branch:, title:, description:)
   )
 end
 
-def get_file_contents(repo_name, path)
+def get_file_contents(repo_name, path, branch_name = nil)
+  # TODO: use branch name if set
   Octokit.contents(repo_name, path:)
 rescue Octokit::NotFound
   nil
@@ -52,4 +53,9 @@ def repo_has_branch?(repo_name, branch_name)
   true
 rescue Octokit::NotFound
   false
+end
+
+def repo_has_pr_for_branch?(repo_name, branch_name)
+  org_name = repo_name.split("/").first
+  Octokit.pull_requests(repo_name, head: "#{org_name}:#{branch_name}").count > 0
 end
