@@ -43,6 +43,12 @@ def stub_github_repo(repo_name, feature_branches: [], pull_request_branches: [],
         default_branch: "main",
       }.to_json,
     )
+  stub_request(:get, "https://api.github.com/repos/alphagov/foo/pulls?head=alphagov:branch&per_page=100")
+  .to_return(
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+    body: [].to_json
+  )
 
   stub_request(:get, %r{\Ahttps://api.github.com/repos/alphagov/#{repo_name}/git/refs/heads/.+\z}).to_return(status: 404)
   (%w[main] + feature_branches).each do |branch|
