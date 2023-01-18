@@ -40,6 +40,8 @@ def bulk_update_file(dry_run:, github_token:, file_path:, file_content:, branch:
       puts "⏭  file already exists with desired content"
     elsif !filter_matches?(repo_name, if_any_exist, if_all_exist, unless_any_exist, unless_all_exist)
       puts "⏭  filters don't match"
+    elsif repo_has_pr?(repo_name, branch)
+      puts "⏭  PR already exists"
     elsif dry_run
       puts "✅ would raise PR (dry run)"
     else

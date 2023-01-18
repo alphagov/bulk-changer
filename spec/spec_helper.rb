@@ -57,6 +57,24 @@ def stub_github_repo(repo_name, feature_branches: [], pull_request_branches: [],
       )
   end
 
+  pull_request_branches.each do |branch|
+    stub_request(:get, "https://api.github.com/repos/alphagov/foo/pulls?head=alphagov:#{branch}&per_page=100")
+    .to_return(
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+      body: [
+        # See https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#list-pull-requests for full response example
+        # We're only including the properties we may actually use in bulk-changer
+        {
+          "head": {
+            "label": "alphagov:#{branch}",
+            "ref": branch,
+          }
+        }
+      ].to_json
+    )
+  end
+
   stub_request(:get, %r{\Ahttps://api.github.com/repos/alphagov/#{repo_name}/contents/.+\z}).to_return(status: 404)
   contents.each do |path, content|
     stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/contents/#{path}")
