@@ -32,7 +32,7 @@ def stub_govuk_repos(repo_names)
     )
 end
 
-def stub_github_repo(repo_name, feature_branches: [], contents: [])
+def stub_github_repo(repo_name, feature_branches: [], pull_request_branches: [], contents: [])
   stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}")
     .to_return(
       status: 200,

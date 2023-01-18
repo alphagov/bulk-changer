@@ -66,6 +66,12 @@ RSpec.describe "#bulk_update_file" do
     expect { call }.to output("[1/1] alphagov/foo ⏭  file already exists with desired content\n").to_stdout
   end
 
+  it "skips repos where a corresponding PR already exists" do
+    stub_govuk_repos(%w[foo])
+    stub_github_repo("foo", pull_request_branches: [branch])
+    expect { call }.to output("[1/1] alphagov/foo ⏭  PR already exists\n").to_stdout
+  end
+
   it "does not raise PRs if the dry_run option is set" do
     stub_govuk_repos(%w[foo])
     stub_github_repo("foo")
