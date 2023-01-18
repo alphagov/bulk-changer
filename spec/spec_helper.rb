@@ -43,7 +43,7 @@ def stub_github_repo(repo_name, feature_branches: [], pull_request_branches: [],
         default_branch: "main",
       }.to_json,
     )
-  stub_request(:get, "https://api.github.com/repos/alphagov/foo/pulls?head=alphagov:branch&per_page=100")
+  stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/pulls?head=alphagov:branch&per_page=100")
   .to_return(
     status: 200,
     headers: { "Content-Type": "application/json" },
@@ -64,7 +64,7 @@ def stub_github_repo(repo_name, feature_branches: [], pull_request_branches: [],
   end
 
   pull_request_branches.each do |branch|
-    stub_request(:get, "https://api.github.com/repos/alphagov/foo/pulls?head=alphagov:#{branch}&per_page=100")
+    stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/pulls?head=alphagov:#{branch}&per_page=100")
     .to_return(
       status: 200,
       headers: { "Content-Type": "application/json" },
