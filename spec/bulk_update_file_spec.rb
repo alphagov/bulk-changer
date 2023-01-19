@@ -78,10 +78,13 @@ RSpec.describe "#bulk_update_file" do
     expect { call }.to output("[1/1] alphagov/foo ❌ repo doesn't exist (or we don't have permission)\n").to_stdout
   end
 
-  it "skips repos where the branch already exists" do
+  it "skips repos where the PR already exists" do
     stub_govuk_repos(%w[foo])
     stub_github_repo("foo", feature_branches: [branch])
-    expect { call }.to output("[1/1] alphagov/foo ⏭  branch \"#{branch}\" already exists\n").to_stdout
+    stub_create_branch_request("foo", branch)
+    stub_create_contents_request("foo", path: file_path, content: file_content, commit_title: pr_title, branch:)
+    stub_github_get_pull_requests("foo", branch)
+    expect { call }.to output("[1/1] alphagov/foo ⏭  PR already exists\n").to_stdout
   end
 
   it "respects the if_any_exist filter" do
