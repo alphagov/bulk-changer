@@ -32,12 +32,12 @@ def stub_govuk_repos(repo_names)
     )
 end
 
- def stub_github_get_pullrequests(repo_name, branch_name)
+ def stub_github_get_pullrequests(repo_name, branch_name, pull_requests: [])
   stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/pulls?head=alphagov:#{branch_name}&per_page=100")
       .to_return(
         status: 200,
         headers: { "Content-Type": "application/json" },
-        body: [{}].to_json,
+        body: pull_requests.to_json,
       )
   end
 

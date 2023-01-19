@@ -85,7 +85,7 @@ RSpec.describe "#bulk_update_file" do
     stub_govuk_repos(%w[foo])
     stub_github_repo("foo", feature_branches: [branch])
     stub_create_branch_request("foo", branch)
-    stub_github_get_pullrequests("foo", branch)
+    stub_github_get_pullrequests("foo", branch, pull_requests:[{}])
     expect { call }.to output("[1/1] alphagov/foo ⏭  PR already exists\n").to_stdout
   end
 
