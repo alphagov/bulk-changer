@@ -37,7 +37,7 @@ end
       .to_return(
         status: 200,
         headers: { "Content-Type": "application/json" },
-        body: [].to_json,
+        body: [{}].to_json,
       )
   end
 
