@@ -65,6 +65,7 @@ RSpec.describe "#bulk_update_file" do
   it "skips repos where the file already exists with the desired content" do
     stub_govuk_repos(%w[foo])
     stub_github_repo("foo", contents: { file_path => file_content })
+    stub_github_get_pullrequests("foo", branch)
     expect { call }.to output("[1/1] alphagov/foo ⏭  file already exists with desired content\n").to_stdout
   end
 
@@ -85,8 +86,19 @@ RSpec.describe "#bulk_update_file" do
     stub_govuk_repos(%w[foo])
     stub_github_repo("foo", feature_branches: [branch])
     stub_create_branch_request("foo", branch)
+    stub_create_pull_request("foo", branch:, title: pr_title, description: pr_description)
     stub_github_get_pullrequests("foo", branch, pull_requests:[{}])
     expect { call }.to output("[1/1] alphagov/foo ⏭  PR already exists\n").to_stdout
+  end
+
+  it "raises PRs if the branch already exists (e.g. bulk change script was interrupted)" do
+    stub_govuk_repos(%w[foo])
+    stub_github_repo("foo", feature_branches: [branch])
+    stub_github_get_pullrequests("foo", branch)
+    raise_pr_stub = stub_create_pull_request("foo", branch:, title: pr_title, description: pr_description)
+
+    expect { call }.to output("[1/1] alphagov/foo ⏭  branch \"#{branch}\" already exists. Creating PR...\n✅ PR raised\n").to_stdout
+    expect(raise_pr_stub).to have_been_requested
   end
 
   it "respects the if_any_exist filter" do
@@ -109,6 +121,7 @@ RSpec.describe "#bulk_update_file" do
     stub_govuk_repos(%w[foo])
     stub_github_repo("foo", contents: { "existing_file" => "File content\n" })
     stub_github_get_pullrequests("foo", branch)
+    stub_create_pull_request("foo", branch:, title: pr_title, description: pr_description)
     expect { call(unless_any_exist: %w[existing_file nonexistent_file]) }.to output("[1/1] alphagov/foo ⏭  filters don't match\n").to_stdout
     expect { call(unless_any_exist: %w[nonexistent_file], dry_run: true) }.to output("[1/1] alphagov/foo ✅ would raise PR (dry run)\n").to_stdout
   end
