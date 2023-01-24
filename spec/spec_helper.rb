@@ -38,8 +38,8 @@ def stub_github_get_pullrequests(repo_name, branch_name, pull_requests: [])
         status: 200,
         headers: { "Content-Type": "application/json" },
         body: pull_requests.to_json,
-  )
-    
+      )
+
   stub_request(:post, "https://api.github.com/repos/alphagov/#{repo_name}/pulls?head=alphagov:#{branch_name}&per_page=100")
   .to_return(
     status: 200,

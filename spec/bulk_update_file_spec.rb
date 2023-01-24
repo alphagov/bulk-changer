@@ -87,7 +87,7 @@ RSpec.describe "#bulk_update_file" do
     stub_github_repo("foo", feature_branches: [branch])
     stub_create_branch_request("foo", branch)
     stub_create_pull_request("foo", branch:, title: pr_title, description: pr_description)
-    stub_github_get_pullrequests("foo", branch, pull_requests:[{}])
+    stub_github_get_pullrequests("foo", branch, pull_requests: [{}])
     expect { call }.to output("[1/1] alphagov/foo ⏭  PR already exists\n").to_stdout
   end
 
@@ -155,7 +155,7 @@ RSpec.describe "#bulk_update_file" do
         end
       end
 
-    expect { call }.to output("[1/1] alphagov/foo ❌ repo doesn't exist (or we don't have permission)\n").to_stdout
+    expect { call }.to output("[1/1] alphagov/foo [rate limited until #{rate_limit_expires_at.strftime '%H:%M'}] ❌ repo doesn't exist (or we don't have permission)\n").to_stdout
     expect(github_request_stub).to have_been_requested.times(2)
   end
 end

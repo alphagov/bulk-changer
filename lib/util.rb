@@ -56,7 +56,7 @@ end
 
 def repo_has_pr?(repo_name, branch_name)
   org_name = repo_name.split("/").first
-  Octokit.pull_requests(repo_name, head: "#{org_name}:#{branch_name}").count > 0
+  Octokit.pull_requests(repo_name, head: "#{org_name}:#{branch_name}").count.positive?
 rescue Octokit::NotFound
   false
 end
