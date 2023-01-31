@@ -145,7 +145,7 @@ RSpec.describe "#bulk_update_file" do
         end
       end
 
-    expect { call }.to output("[1/1] alphagov/foo ❌ repo doesn't exist (or we don't have permission)\n").to_stdout
+    expect { call }.to output("[1/1] alphagov/foo GitHub rate limit reached. bulk-changer will automatically resume at #{rate_limit_expires_at.strftime '%H:%M'} ❌ repo doesn't exist (or we don't have permission)\n").to_stdout
     expect(github_request_stub).to have_been_requested.times(2)
   end
 end
