@@ -45,15 +45,19 @@ def bulk_update_file(dry_run:, github_token:, file_path:, file_content:, branch:
     elsif dry_run
       puts "✅ would raise PR (dry run)"
     else
-      create_branch! repo, branch
-      commit_file!(
-        repo,
-        path: file_path,
-        content: file_content,
-        commit_title: pr_title,
-        branch:,
-        sha: existing_file&.sha,
-      )
+      if repo_has_branch?(repo_name, branch)
+        puts "⏭  branch \"#{branch}\" already exists. Creating PR..."
+      else
+        create_branch! repo, branch
+        commit_file!(
+          repo,
+          path: file_path,
+          content: file_content,
+          commit_title: pr_title,
+          branch:,
+          sha: existing_file&.sha,
+        )
+      end
       create_pr! repo, branch: branch, title: pr_title, description: pr_description
 
       puts "✅ PR raised"

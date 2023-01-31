@@ -78,6 +78,15 @@ RSpec.describe "#bulk_update_file" do
     expect { call }.to output("[1/1] alphagov/foo ❌ repo doesn't exist (or we don't have permission)\n").to_stdout
   end
 
+  it "raises PRs if the branch already exists (e.g. bulk change script was interrupted)" do
+    stub_govuk_repos(%w[foo])
+    stub_github_repo("foo", feature_branches: [branch])
+    raise_pr_stub = stub_create_pull_request("foo", branch:, title: pr_title, description: pr_description)
+
+    expect { call }.to output("[1/1] alphagov/foo ⏭  branch \"#{branch}\" already exists. Creating PR...\n✅ PR raised\n").to_stdout
+    expect(raise_pr_stub).to have_been_requested
+  end
+
   it "skips repos where the PR already exists" do
     stub_govuk_repos(%w[foo])
     stub_github_repo("foo", feature_branches: [branch])
