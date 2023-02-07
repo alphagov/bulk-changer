@@ -32,7 +32,23 @@ def stub_govuk_repos(repo_names)
     )
 end
 
-def stub_github_repo(repo_name, feature_branches: [], contents: [])
+def stub_github_get_pull_requests(repo_name, branch_name)
+  stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/pulls?head=alphagov:#{branch_name}&per_page=100")
+    .to_return(
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+      body: [{}].to_json,
+    )
+end
+
+def stub_github_repo(repo_name, branch_name: "branch", feature_branches: [], pull_request_branches: [], contents: [])
+  stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/pulls?head=alphagov:#{branch_name}&per_page=100")
+  .to_return(
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+    body: [].to_json,
+  )
+
   stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}")
     .to_return(
       status: 200,
@@ -68,6 +84,15 @@ def stub_github_repo(repo_name, feature_branches: [], contents: [])
           content: Base64.encode64(content),
         }.to_json,
       )
+  end
+
+  pull_request_branches.each do |branch|
+    stub_request(:get, "https://api.github.com/repos/alphagov/#{repo_name}/pulls?head=alphagov:#{branch}&per_page=100")
+    .to_return(
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+      body: [{}].to_json,
+    )
   end
 end
 
