@@ -14,6 +14,12 @@ def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:,
     quit_requested = true
   end
 
+  puts "Search for references of '#{old_content}' and replace with '#{new_content}' in the following file:"
+  puts file_path
+  printf "\e[31mPress 'y' to continue: \e[0m"
+  prompt = $stdin.gets.chomp
+  exit 0 unless prompt == "y"
+
   num_index_columns = govuk_repos.count.to_s.length
   num_name_columns = govuk_repos.map(&:length).max
   govuk_repos.each.with_index(1) do |repo_name, i|
@@ -44,8 +50,13 @@ def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:,
                            else
                              existing_file_content.sub(old_content, new_content)
                            end
-        puts "You are about to make the following changes:"
+        puts "\e[31mYou are about to create a new PR on `#{branch}` with the following changes:\e[0m"
         puts "-------------------------------------------"
+        puts pr_title
+        puts ""
+        puts pr_description
+        puts "-------------------------------------------"
+        puts file_path
         puts diff(existing_file_content, new_file_content)
         puts "-------------------------------------------"
         printf "\e[31mPress 'y' to continue: \e[0m"
