@@ -11,7 +11,7 @@ def confirm_action(message)
   prompt.casecmp?("y")
 end
 
-def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:, branch:, commit_title:, commit_description:, pr_title:, pr_description:)
+def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:, branch:, commit_title:, commit_description:, pr_title:, pr_description:, use_regex:)
   Octokit.access_token = github_token
 
   quit_requested = false
@@ -51,13 +51,14 @@ def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:,
       puts "⏭  file not found"
     else
       existing_file_content = Base64.decode64(existing_file.content)
-      if !existing_file_content.include?(old_content)
+      old_content_regex = use_regex ? Regexp.new(old_content) : Regexp.new(Regexp.escape(old_content))
+      if !old_content_regex.match?(existing_file_content)
         puts "⏭  content not found in file"
       else
         new_file_content = if global
-                             existing_file_content.gsub(old_content, new_content)
+                             existing_file_content.gsub(old_content_regex, new_content)
                            else
-                             existing_file_content.sub(old_content, new_content)
+                             existing_file_content.sub(old_content_regex, new_content)
                            end
 
         create_branch! repo, branch
