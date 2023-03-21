@@ -47,8 +47,10 @@ usage: ./bulk-replace [options]
 
 pull request options:
     --branch            name of the branch to commit the change to (required)
-    --pr-title          title for the PR to raise (required)
-    --pr-description    description of the PR to raise (required)
+    --commit-title      title for the commit (required)
+    --commit-description description of the commit (required)
+    --pr-title          title for the PR to raise (optional)
+    --pr-description    description of the PR to raise (optional)
 ```
 
 ## Examples

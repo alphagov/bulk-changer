@@ -37,8 +37,10 @@ def create_pr!(repo, branch:, title:, description:)
   )
 end
 
-def get_file_contents(repo_name, path)
-  Octokit.contents(repo_name, path:)
+def get_file_contents(repo_name, path, ref = nil)
+  options = { path: }
+  options[:ref] = ref if ref
+  Octokit.contents(repo_name, options)
 rescue Octokit::NotFound
   nil
 end
