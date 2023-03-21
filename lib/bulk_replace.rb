@@ -5,13 +5,15 @@ def diff(string1, string2)
   Diffy::Diff.new("#{string1}\n", "#{string2}\n").to_s :color
 end
 
-def confirm_action(message)
+def confirm_action(message, always_yes: false)
+  return true if always_yes
+
   printf "\e[31m#{message} (y/n): \e[0m"
   prompt = $stdin.gets.chomp
   prompt.casecmp?("y")
 end
 
-def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:, branch:, commit_title:, commit_description:, pr_title:, pr_description:, use_regex:)
+def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:, branch:, commit_title:, commit_description:, pr_title:, pr_description:, use_regex:, always_yes: false)
   Octokit.access_token = github_token
 
   quit_requested = false
@@ -26,7 +28,7 @@ def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:,
 
   num_index_columns = govuk_repos.count.to_s.length
   num_name_columns = govuk_repos.map(&:length).max
-  govuk_repos.each_with_index(1) do |repo_name, i|
+  govuk_repos.each.with_index(1) do |repo_name, i|
     exit 130 if quit_requested
 
     print "[#{i.to_s.rjust(num_index_columns)}/#{govuk_repos.count}] #{repo_name.ljust(num_name_columns)} "
@@ -38,9 +40,10 @@ def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:,
       next
     end
 
-    if repo_has_branch?(repo_name, branch)
+    branch_exists = repo_has_branch?(repo_name, branch)
+    if branch_exists
       puts "⏭  branch \"#{branch}\" already exists"
-      next unless confirm_action("Continue on existing branch?")
+      next unless confirm_action("Continue on existing branch?", always_yes:)
 
       existing_file = get_file_contents(repo_name, file_path, branch)
     else
@@ -52,6 +55,7 @@ def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:,
     else
       existing_file_content = Base64.decode64(existing_file.content)
       old_content_regex = use_regex ? Regexp.new(old_content) : Regexp.new(Regexp.escape(old_content))
+      has_pr = repo_has_pr?(repo_name, branch)
       if !old_content_regex.match?(existing_file_content)
         puts "⏭  content not found in file"
       else
@@ -61,9 +65,9 @@ def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:,
                              existing_file_content.sub(old_content_regex, new_content)
                            end
 
-        create_branch! repo, branch
+        create_branch!(repo, branch) unless branch_exists
 
-        puts "\e[31mYou are about to #{repo_has_pr?(repo_name, branch) ? 'add a commit to an existing' : 'create a new'} PR on `#{branch}` with the following changes:\e[0m"
+        puts "\e[31mYou are about to #{has_pr ? 'add a commit to an existing' : 'create a new'} PR on `#{branch}` with the following changes:\e[0m"
         puts "-------------------------------------------"
         puts pr_title ||= commit_title
         puts ""
@@ -83,7 +87,7 @@ def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:,
           sha: existing_file&.sha,
         )
 
-        if !repo_has_pr?(repo_name, branch)
+        unless has_pr
           create_pr! repo, branch:, title: pr_title, description: pr_description
           puts "✅ PR raised"
         end

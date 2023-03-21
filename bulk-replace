@@ -16,7 +16,7 @@ def get_options
     o.string "--file-path", "path to the file to update (required)", required: true
     o.string "--old-content", "content to be changed (required)", required: true
     o.string "--new-content", "new content (required)", required: true
-    o.boolean "--global", "replace all occurrences of content (required)", required: true
+    o.boolean "--global", "replace all occurrences of content (optional)", required: false, default: false
 
     o.separator "\npull request options:"
     o.string "--branch", "name of the branch to commit the change to (required)", required: true
@@ -24,7 +24,8 @@ def get_options
     o.string "--commit-description", "description of the commit (required)", required: true
     o.string "--pr-title", "title for the PR to raise (optional)", required: false
     o.string "--pr-description", "description of the PR to raise (optional)", required: false
-    o.boolean "--use-regex", "use a regex pattern to find content (required)", required: true
+    o.boolean "--use-regex", "use a regex pattern to find content (optional)", required: false, default: false
+    o.boolean "--always-yes", "automatically confirm all 'Continue on existing branch?' questions", required: false, default: false
   end
 
   begin
