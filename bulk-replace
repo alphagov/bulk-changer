@@ -26,6 +26,7 @@ def get_options
     o.string "--pr-description", "description of the PR to raise (optional)", required: false
     o.boolean "--use-regex", "use a regex pattern to find content (optional)", required: false, default: false
     o.boolean "--always-yes", "automatically confirm all 'Continue on existing branch?' questions", required: false, default: false
+    o.boolean "--file-path-is-regex", "use a regex pattern to find file paths (optional)", required: false, default: false
   end
 
   begin
