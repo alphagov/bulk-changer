@@ -43,12 +43,16 @@ usage: ./bulk-replace [options]
     --file-path         path to the file to update (required)
     --old-content       content to be replaced in file (required)
     --new-content       new content for file (required)
-    --global            replace all occurrences of content (true by default)
+    --global            replace all occurrences of content (optional, false by default)
+    --use-regex         use a regex pattern to find content (optional, false by default)
+    --always-yes        automatically confirm all 'Continue on existing branch?' questions (optional, false by default)
 
 pull request options:
     --branch            name of the branch to commit the change to (required)
-    --pr-title          title for the PR to raise (required)
-    --pr-description    description of the PR to raise (required)
+    --commit-title      title for the commit (required)
+    --commit-description description of the commit (required)
+    --pr-title          title for the PR to raise (optional)
+    --pr-description    description of the PR to raise (optional)
 ```
 
 ## Examples

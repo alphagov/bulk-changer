@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+require_relative "lib/setup"
+require "changelog_updater"
+require "slop"
+
+def get_options
+  options = Slop::Options.new do |o|
+    o.on "-h", "--help", "print this usage information" do
+      puts o
+      exit
+    end
+    o.string "--github-token", "GitHub API token"
+
+    o.separator ""
+    o.string "--branch", "name of the branch to commit the change to (required)", required: true
+    o.string "--changes", "changes to be added to the CHANGELOG.md (required)", required: true
+    o.string "--change-type", "changes type (major, minor, patch) (required)", required: true
+    o.boolean "--unreleased", "specify if the changes should go to the changelog as unreleased (default) or as a new version", required: false, default: true
+    o.boolean "--always-yes", "automatically confirm all 'Continue on existing branch?' questions", required: false, default: false
+  end
+
+  begin
+    options.parse(ARGV).to_hash
+  rescue Slop::Error => e
+    puts e
+    puts options
+    exit
+  end
+end
+
+changelog_updater(**get_options)
