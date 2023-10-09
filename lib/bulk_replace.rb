@@ -72,7 +72,7 @@ def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:,
           branch:,
           sha: existing_file&.sha,
         )
-        create_pr! repo, branch: branch, title: pr_title, description: pr_description
+        create_pr! repo, branch:, title: pr_title, description: pr_description
 
         puts "✅ PR raised"
       end

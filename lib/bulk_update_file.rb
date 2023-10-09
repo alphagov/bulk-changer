@@ -58,7 +58,7 @@ def bulk_update_file(dry_run:, github_token:, file_path:, file_content:, branch:
           sha: existing_file&.sha,
         )
       end
-      create_pr! repo, branch: branch, title: pr_title, description: pr_description
+      create_pr! repo, branch:, title: pr_title, description: pr_description
 
       puts "✅ PR raised"
     end
