@@ -4,7 +4,7 @@ source "https://rubygems.org"
 
 gem "diffy"
 gem "faraday-retry"
-gem "octokit", "~> 7.2"
+gem "octokit", "~> 8.0"
 gem "slop"
 
 group :test do
