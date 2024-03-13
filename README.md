@@ -4,6 +4,17 @@ To run RSpec and RuboCop:
 
 `bundle exec rake`
 
+## Required GitHub permissions
+
+In order to run any of these commands, you will need to [generate a personal access token](https://github.com/settings/personal-access-tokens/new), with:
+
+* Resource owner: alphagov
+* Repository access: All repositories
+* Repository permissions:
+  * Contents: read and write
+  * Pull requests: read and write
+  * Workflows: read and write (only required if you will be using Bulk Changer to create or modify GitHub Actions workflows)
+
 ## Commands
 
 ### `bulk-update-file`
