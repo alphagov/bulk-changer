@@ -1,5 +1,6 @@
 require "octokit"
 require "open-uri"
+require "diffy"
 
 def govuk_repos
   @govuk_repos ||= JSON.parse(
@@ -69,4 +70,20 @@ def repo_has_pr?(repo_name, branch_name)
   Octokit.pull_requests(repo_name, head: "#{org_name}:#{branch_name}").count.positive?
 rescue Octokit::NotFound
   false
+end
+def diff(string1, string2)
+  Diffy::Diff.new("#{string1}\n", "#{string2}\n").to_s :color
+end
+
+def confirm_action(message, overwrite_branch: false)
+  return true if overwrite_branch
+
+  printf "\e[31m#{message} (y/n): \e[0m"
+  prompt = $stdin.gets.chomp
+  prompt.casecmp?("y")
+end
+def get_repo(repo_name)
+  Octokit.repo(repo_name)
+rescue Octokit::NotFound
+  nil
 end

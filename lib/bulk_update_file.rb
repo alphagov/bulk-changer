@@ -28,9 +28,8 @@ def bulk_update_file(dry_run:, github_token:, file_path:, file_content:, branch:
 
     print "[#{i.to_s.rjust(num_index_columns)}/#{govuk_repos.count}] #{repo_name.ljust(num_name_columns)} "
 
-    repo = begin
-      Octokit.repo(repo_name)
-    rescue Octokit::NotFound
+    repo = get_repo(repo_name)
+    if repo.nil?
       puts "❌ repo doesn't exist (or we don't have permission)"
       next
     end

@@ -1,9 +1,4 @@
 require "util"
-require "diffy"
-
-def diff(string1, string2)
-  Diffy::Diff.new("#{string1}\n", "#{string2}\n").to_s :color
-end
 
 def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:, branch:, pr_title:, pr_description:)
   Octokit.access_token = github_token
@@ -14,11 +9,8 @@ def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:,
     quit_requested = true
   end
 
-  puts "Search for references of '#{old_content}' and replace with '#{new_content}' in the following file:"
-  puts file_path
-  printf "\e[31mPress 'y' to continue: \e[0m"
-  prompt = $stdin.gets.chomp
-  exit 0 unless prompt == "y"
+  puts "Search for references of '#{old_content}' and replace with '#{new_content}'"
+  exit 0 unless confirm_action("Press 'y' to continue:")
 
   num_index_columns = govuk_repos.count.to_s.length
   num_name_columns = govuk_repos.map(&:length).max
@@ -27,9 +19,8 @@ def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:,
 
     print "[#{i.to_s.rjust(num_index_columns)}/#{govuk_repos.count}] #{repo_name.ljust(num_name_columns)} "
 
-    repo = begin
-      Octokit.repo(repo_name)
-    rescue Octokit::NotFound
+    repo = get_repo(repo_name)
+    if repo.nil?
       puts "❌ repo doesn't exist (or we don't have permission)"
       next
     end
