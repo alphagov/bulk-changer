@@ -20,8 +20,13 @@ def get_options
 
     o.separator "\npull request options:"
     o.string "--branch", "name of the branch to commit the change to (required)", required: true
-    o.string "--pr-title", "title for the PR to raise (required)", required: true
-    o.string "--pr-description", "description of the PR to raise (required)", required: true
+    o.string "--commit-title", "title for the commit (required)", required: true
+    o.string "--commit-description", "description of the commit (required)", required: true
+    o.string "--pr-title", "title for the PR to raise (optional)", required: false
+    o.string "--pr-description", "description of the PR to raise (optional)", required: false
+    o.boolean "--use-regex", "use a regex pattern to find content (optional)", required: false, default: false
+    o.boolean "--continue-on-existing-branch", "automatically confirm all 'Continue on existing branch?' questions", required: false, default: false
+    o.boolean "--file-path-is-regex", "use a regex pattern to find file paths (optional)", required: false, default: false
   end
 
   begin
