@@ -13,6 +13,10 @@ def create_branch!(repo, branch_name)
   sleep 1
   main_branch = Octokit.ref(repo.full_name, "heads/#{repo.default_branch}")
   Octokit.create_ref(repo.full_name, "refs/heads/#{branch_name}", main_branch.object.sha)
+rescue Octokit::NotFound, Octokit::UnprocessableEntity => e
+  puts "❌ Failed to create branch: #{e.message}"
+  puts "Check if '#{branch_name}' already exists or if you have the necessary permissions."
+  false
 end
 
 def commit_file!(repo, path:, content:, commit_title:, branch:, sha: nil)
@@ -24,6 +28,10 @@ def commit_file!(repo, path:, content:, commit_title:, branch:, sha: nil)
     content,
     { branch: }.merge(sha.nil? ? {} : { sha: }),
   )
+rescue Octokit::NotFound, Octokit::UnprocessableEntity => e
+  puts "❌ Failed to commit file: #{e.message}"
+  puts "Check if '#{path}' exists or if you have the necessary permissions."
+  false
 end
 
 def create_pr!(repo, branch:, title:, description:)
@@ -35,6 +43,8 @@ def create_pr!(repo, branch:, title:, description:)
     title,
     description,
   )
+rescue Octokit::NotFound, Octokit::UnprocessableEntity => e
+  puts "❌ Failed to create PR: #{e.message}"
 end
 
 def get_file_contents(repo_name, path)
