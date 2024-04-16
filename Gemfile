@@ -11,5 +11,6 @@ group :test do
   gem "rake"
   gem "rspec"
   gem "rubocop-govuk"
+  gem "simplecov", require: false
   gem "webmock"
 end
