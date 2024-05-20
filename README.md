@@ -44,22 +44,27 @@ filtering options:
 
 ### `bulk-replace`
 
-Look for a file in every GOV.UK repo, at the given path, with the given content and replace with new content. If the file does not currently exist, or if it doesn't have the given content, then that repo is skipped, otherwise a PR is raised.
+Look for a file in every GOV.UK repo, at the given path, with the given content and replace with new content. If the file does not currently exist, or if it doesn't have the given content, then that repo is skipped, otherwise a PR is raised. If the branch already exists, a new commit can be added to it.
 
 ```
 usage: ./bulk-replace [options]
-    -h, --help          print this usage information
-    --github-token      GitHub API token
+    -h, --help                       print this usage information
+    --github-token                   GitHub API token
 
-    --file-path         path to the file to update (required)
-    --old-content       content to be replaced in file (required)
-    --new-content       new content for file (required)
-    --global            replace all occurrences of content (true by default)
+    --file-path                      path to the file to update (required)
+    --old-content                    content to be replaced in file (required)
+    --new-content                    new content for file (required)
+    --global                         replace all occurrences of content (true by default)
 
 pull request options:
-    --branch            name of the branch to commit the change to (required)
-    --pr-title          title for the PR to raise (required)
-    --pr-description    description of the PR to raise (required)
+    --branch                         name of the branch to commit the change to (required)
+    --pr-title                       title for the PR to raise
+    --pr-description                 description of the PR to raise
+    --commit-title                   title for the commit (required)
+    --commit-description             description of the commit (required)
+    --use-regex                      use a regex pattern to find content (false by default)
+    --continue-on-existing-branch    automatically confirm all 'Continue on existing branch?' questions (false by default)
+    --file-path-is-regex             use a regex pattern to find file paths (false by default)
 ```
 
 ## Examples

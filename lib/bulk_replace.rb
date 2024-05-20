@@ -1,11 +1,6 @@
 require "util"
-require "diffy"
 
-def diff(string1, string2)
-  Diffy::Diff.new("#{string1}\n", "#{string2}\n").to_s :color
-end
-
-def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:, branch:, pr_title:, pr_description:)
+def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:, branch:, commit_title:, commit_description:, pr_title:, pr_description:, use_regex:, continue_on_existing_branch:, file_path_is_regex:)
   Octokit.access_token = github_token
 
   quit_requested = false
@@ -14,11 +9,8 @@ def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:,
     quit_requested = true
   end
 
-  puts "Search for references of '#{old_content}' and replace with '#{new_content}' in the following file:"
-  puts file_path
-  printf "\e[31mPress 'y' to continue: \e[0m"
-  prompt = $stdin.gets.chomp
-  exit 0 unless prompt == "y"
+  puts "Search for references of '#{old_content}' and replace with '#{new_content}'"
+  exit 0 unless confirm_action("Press 'y' to continue:")
 
   num_index_columns = govuk_repos.count.to_s.length
   num_name_columns = govuk_repos.map(&:length).max
@@ -27,54 +19,98 @@ def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:,
 
     print "[#{i.to_s.rjust(num_index_columns)}/#{govuk_repos.count}] #{repo_name.ljust(num_name_columns)} "
 
-    repo = begin
-      Octokit.repo(repo_name)
-    rescue Octokit::NotFound
+    repo = get_repo(repo_name)
+    if repo.nil?
       puts "❌ repo doesn't exist (or we don't have permission)"
       next
     end
 
-    existing_file = get_file_contents(repo_name, file_path)
+    branch_exists = repo_has_branch?(repo_name, branch)
 
-    if existing_file.nil?
-      puts "⏭  file not found"
+    if file_path_is_regex
+      files_in_repo = list_files_in_repo(repo_name, branch: branch_exists ? branch : nil)
+      matching_files = files_in_repo.select { |path| Regexp.compile(file_path).match?(path) }
     else
-      existing_file_content = Base64.decode64(existing_file.content)
-      if !existing_file_content.include?(old_content)
-        puts "⏭  content not found in file"
-      elsif repo_has_branch?(repo_name, branch)
+      matching_files = [file_path]
+    end
+
+    matching_files.each do |file|
+      if branch_exists
         puts "⏭  branch \"#{branch}\" already exists"
+        next unless confirm_action("Continue on existing branch?", continue_on_existing_branch:)
+
+        existing_file = get_file_contents(repo_name, file, branch)
       else
-        new_file_content = if global
-                             existing_file_content.gsub(old_content, new_content)
-                           else
-                             existing_file_content.sub(old_content, new_content)
-                           end
-        puts "\e[31mYou are about to create a new PR on `#{branch}` with the following changes:\e[0m"
-        puts "-------------------------------------------"
-        puts pr_title
-        puts ""
-        puts pr_description
-        puts "-------------------------------------------"
-        puts file_path
-        puts diff(existing_file_content, new_file_content)
-        puts "-------------------------------------------"
-        printf "\e[31mPress 'y' to continue: \e[0m"
-        prompt = $stdin.gets.chomp
-        break unless prompt == "y"
+        existing_file = get_file_contents(repo_name, file)
+      end
 
-        create_branch! repo, branch
-        commit_file!(
-          repo,
-          path: file_path,
-          content: new_file_content,
-          commit_title: pr_title,
-          branch:,
-          sha: existing_file&.sha,
-        )
-        create_pr! repo, branch:, title: pr_title, description: pr_description
+      if existing_file.nil?
+        puts "⏭  file not found"
+      else
+        existing_file_content = Base64.decode64(existing_file.content)
+        old_content_regex = use_regex ? Regexp.new(old_content) : Regexp.new(Regexp.escape(old_content))
+        has_pr = repo_has_pr?(repo_name, branch)
+        if !old_content_regex.match?(existing_file_content)
+          puts "⏭  content not found in file"
+        else
+          new_file_content = if global
+                               existing_file_content.gsub(old_content_regex, new_content)
+                             else
+                               existing_file_content.sub(old_content_regex, new_content)
+                             end
 
-        puts "✅ PR raised"
+          branch_created = create_branch!(repo, branch) unless branch_exists
+          if branch_created || branch_exists
+            puts "\e[31mYou are about to #{has_pr ? 'add a commit to an existing' : 'create a new'} PR on `#{branch}` with the following changes:\e[0m"
+            puts "-------------------------------------------"
+            puts pr_title ||= commit_title
+            puts ""
+            puts pr_description ||= commit_description
+            puts "-------------------------------------------"
+            puts file
+            puts diff(existing_file_content, new_file_content)
+            puts "-------------------------------------------"
+            proceed = false
+            until proceed
+              print "Proceed with these changes? (y)es, (e)dit or (n)o? "
+              choice = $stdin.gets.chomp.downcase
+
+              case choice
+              when "y", "yes"
+                proceed = true
+              when "e", "edit"
+                edited_content = edit_content(new_file_content)
+                new_file_content = edited_content
+
+                puts "Updated changes:"
+                puts diff(existing_file_content, new_file_content)
+              when "n", "no"
+                puts "Skipping changes for #{repo_name}"
+                break
+              else
+                puts "Invalid option, please choose (y)es, (e)dit or (n)o."
+              end
+            end
+
+            next unless proceed
+
+            commit_file!(
+              repo,
+              path: file,
+              content: new_file_content,
+              commit_title: "#{commit_title}\n\n#{commit_description}",
+              branch:,
+              sha: existing_file&.sha,
+            )
+
+            if has_pr
+              puts "✅ commit added to PR"
+            else
+              create_pr! repo, branch:, title: pr_title, description: pr_description
+              puts "✅ PR raised"
+            end
+          end
+        end
       end
     end
   end
