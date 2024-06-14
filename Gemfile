@@ -2,6 +2,7 @@
 
 source "https://rubygems.org"
 
+gem "base64"
 gem "diffy"
 gem "faraday-retry"
 gem "octokit", "~> 9.1"
