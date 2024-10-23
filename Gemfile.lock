@@ -22,7 +22,7 @@ GEM
       bigdecimal
       rexml
     diff-lcs (1.5.1)
-    diffy (3.4.2)
+    diffy (3.4.3)
     docile (1.4.0)
     drb (2.2.1)
     faraday (2.12.0)
