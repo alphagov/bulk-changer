@@ -1,3 +1,4 @@
+require "base64"
 require "util"
 
 # rubocop:disable Layout/MultilineOperationIndentation, Layout/SpaceInsideParens, Style/InverseMethods
