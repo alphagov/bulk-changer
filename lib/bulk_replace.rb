@@ -1,6 +1,7 @@
+require "base64"
 require "util"
 
-def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:, branch:, commit_title:, commit_description:, pr_title:, pr_description:, use_regex:, continue_on_existing_branch:, file_path_is_regex:)
+def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:, branch:, commit_title:, commit_description:, pr_title:, pr_description:, use_regex:, continue_on_existing_branch:, auto_confirm:, file_path_is_regex:)
   Octokit.access_token = github_token
 
   quit_requested = false
@@ -37,7 +38,7 @@ def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:,
     matching_files.each do |file|
       if branch_exists
         puts "⏭  branch \"#{branch}\" already exists"
-        next unless confirm_action("Continue on existing branch?", continue_on_existing_branch:)
+        next unless confirm_action("Continue on existing branch?", overwrite_branch: continue_on_existing_branch)
 
         existing_file = get_file_contents(repo_name, file, branch)
       else
@@ -70,7 +71,7 @@ def bulk_replace(github_token:, file_path:, old_content:, new_content:, global:,
             puts file
             puts diff(existing_file_content, new_file_content)
             puts "-------------------------------------------"
-            proceed = false
+            proceed = auto_confirm
             until proceed
               print "Proceed with these changes? (y)es, (e)dit or (n)o? "
               choice = $stdin.gets.chomp.downcase
