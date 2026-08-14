@@ -44,7 +44,7 @@ filtering options:
 
 ### `bulk-replace`
 
-Look for a file in every GOV.UK repo, at the given path, with the given content and replace with new content. If the file does not currently exist, or if it doesn't have the given content, then that repo is skipped, otherwise a PR is raised. If the branch already exists, a new commit can be added to it.
+Look for a file in every GOV.UK repo, at the given path, with the given content and replace with new content. If the file does not currently exist, or if it doesn't have the given content, then that repo is skipped, otherwise a PR is raised. If the branch already exists, a new commit can be added to it. Use `--continue-on-existing-branch` to skip confirmation when reusing an existing branch, and `--auto-confirm` to skip per-change confirmation prompts.
 
 ```
 usage: ./bulk-replace [options]
@@ -54,7 +54,7 @@ usage: ./bulk-replace [options]
     --file-path                      path to the file to update (required)
     --old-content                    content to be replaced in file (required)
     --new-content                    new content for file (required)
-    --global                         replace all occurrences of content (true by default)
+    --global                         replace all occurrences of content (required)
 
 pull request options:
     --branch                         name of the branch to commit the change to (required)
@@ -64,6 +64,7 @@ pull request options:
     --commit-description             description of the commit (required)
     --use-regex                      use a regex pattern to find content (false by default)
     --continue-on-existing-branch    automatically confirm all 'Continue on existing branch?' questions (false by default)
+    --auto-confirm                   automatically confirm all 'Proceed with these changes?' questions (false by default)
     --file-path-is-regex             use a regex pattern to find file paths (false by default)
 ```
 
